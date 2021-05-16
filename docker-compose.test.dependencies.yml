@@ -1,0 +1,22 @@
+version: '3.5'
+
+services:
+  db-test:
+    container_name: guideliner-db-test
+    image: postgres:12.6
+    expose:
+      - 5432
+    ports:
+      - 5555:5432
+    environment:
+      POSTGRES_USER: dblogin
+      POSTGRES_PASSWORD: dbpassword
+      POSTGRES_DB: test_db
+    restart: on-failure
+    networks:
+      - guideliner-test
+
+networks:
+  guideliner-test:
+    driver: bridge
+    name: guideliner-test

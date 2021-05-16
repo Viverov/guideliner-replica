@@ -1,2 +1,6 @@
 # guideliner
-Guideliner-backend
+
+Required env:
+GUIDELINER_JWT_SECRET
+
+

@@ -1,0 +1,17 @@
+{
+  "db": {
+    "host": "127.0.0.1",
+    "port": "5555",
+    "login": "dblogin",
+    "password": "dbpassword",
+    "name": "test_db",
+    "sslMode": "disable"
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": "8080"
+  },
+  "tokens": {
+    "secretKey": "SECRET_KEY"
+  }
+}
