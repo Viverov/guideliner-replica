@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type TokenServicer interface {
+type TokenService interface {
 	GenerateToken(userId uint, tokenTTL time.Duration) (token string, err error)
 	ValidateToken(token string) (claims *AuthClaims, err error)
 }
@@ -41,4 +41,10 @@ type UnexpectedTokenError struct {
 
 func (e *UnexpectedTokenError) Error() string {
 	return fmt.Sprintf("Can't handle provided token: %s", e.token)
+}
+
+type UnexpectedGenerateError struct {}
+
+func (e *UnexpectedGenerateError) Error() string {
+	return "Can't generate new token by unexpected error"
 }

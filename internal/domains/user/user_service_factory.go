@@ -10,7 +10,7 @@ import (
 
 const defaultTokenDuration = time.Hour * 48
 
-func NewUserService(tokenSecretKey string, db *gorm.DB) us.UserServicer {
+func NewUserService(tokenSecretKey string, db *gorm.DB) us.UserService {
 	return us.NewUserService(
 		ts.NewTokenServiceJWT(tokenSecretKey),
 		ur.NewUserRepositoryPostgresql(db),

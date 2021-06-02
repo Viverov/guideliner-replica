@@ -3,18 +3,19 @@ package user_service
 import (
 	"errors"
 	tokens "github.com/Viverov/guideliner/internal/domains/user/token_service"
+	"github.com/Viverov/guideliner/internal/domains/user/user_dto"
 	userEntity "github.com/Viverov/guideliner/internal/domains/user/user_entity"
 	userRepository "github.com/Viverov/guideliner/internal/domains/user/user_repository"
 	"time"
 )
 
-type userService struct {
-	tokenService   tokens.TokenServicer
+type userServiceImpl struct {
+	tokenService   tokens.TokenService
 	userRepository userRepository.UserRepositorer
 	tokenTTL       time.Duration
 }
 
-func (u *userService) FindById(id uint) (userEntity.DTO, error) {
+func (u *userServiceImpl) FindById(id uint) (user_dto.DTO, error) {
 	user, err := u.userRepository.FindOne(userRepository.FindCondition{
 		ID: id,
 	})
@@ -22,10 +23,10 @@ func (u *userService) FindById(id uint) (userEntity.DTO, error) {
 		return nil, processRepositoryError(err)
 	}
 
-	return userEntity.NewDTO(user.ID(), user.Email()), nil
+	return user_dto.NewDTO(user.ID(), user.Email()), nil
 }
 
-func (u *userService) FindByEmail(email string) (userEntity.DTO, error) {
+func (u *userServiceImpl) FindByEmail(email string) (user_dto.DTO, error) {
 	user, err := u.userRepository.FindOne(userRepository.FindCondition{
 		Email: email,
 	})
@@ -33,10 +34,10 @@ func (u *userService) FindByEmail(email string) (userEntity.DTO, error) {
 		return nil, processRepositoryError(err)
 	}
 
-	return userEntity.NewDTO(user.ID(), user.Email()), nil
+	return user_dto.NewDTO(user.ID(), user.Email()), nil
 }
 
-func (u *userService) Register(email string, password string) (userEntity.DTO, error) {
+func (u *userServiceImpl) Register(email string, password string) (user_dto.DTO, error) {
 	alreadyExistUser, err := u.FindByEmail(email)
 	if err != nil {
 		return nil, err
@@ -55,10 +56,10 @@ func (u *userService) Register(email string, password string) (userEntity.DTO, e
 	if err != nil {
 		return nil, processRepositoryError(err)
 	}
-	return userEntity.NewDTO(id, email), nil
+	return user_dto.NewDTO(id, email), nil
 }
 
-func (u *userService) ValidateCredentials(email string, password string) (bool, error) {
+func (u *userServiceImpl) ValidateCredentials(email string, password string) (bool, error) {
 	user, err := u.userRepository.FindOne(userRepository.FindCondition{
 		Email: email,
 	})
@@ -71,7 +72,7 @@ func (u *userService) ValidateCredentials(email string, password string) (bool, 
 	return isValid, nil
 }
 
-func (u *userService) ChangePassword(id uint, newPassword string) error {
+func (u *userServiceImpl) ChangePassword(id uint, newPassword string) error {
 	user, err := u.userRepository.FindOne(userRepository.FindCondition{
 		ID: id,
 	})
@@ -87,7 +88,7 @@ func (u *userService) ChangePassword(id uint, newPassword string) error {
 	return nil
 }
 
-func (u *userService) GetToken(userId uint) (string, error) {
+func (u *userServiceImpl) GetToken(userId uint) (string, error) {
 	_, err := u.userRepository.FindOne(userRepository.FindCondition{
 		ID: userId,
 	})
@@ -103,7 +104,7 @@ func (u *userService) GetToken(userId uint) (string, error) {
 	return token, nil
 }
 
-func (u *userService) GetUserFromToken(token string) (userEntity.DTO, error) {
+func (u *userServiceImpl) GetUserFromToken(token string) (user_dto.DTO, error) {
 	claims, err := u.tokenService.ValidateToken(token)
 	if err != nil {
 		return nil, processTokenError(err)
@@ -117,11 +118,11 @@ func (u *userService) GetUserFromToken(token string) (userEntity.DTO, error) {
 		return nil, processRepositoryError(err)
 	}
 
-	return userEntity.NewDTO(user.ID(), user.Email()), nil
+	return user_dto.NewDTO(user.ID(), user.Email()), nil
 }
 
-func NewUserService(tokenService tokens.TokenServicer, userRepository userRepository.UserRepositorer, tokenTTL time.Duration) UserServicer {
-	return &userService{
+func NewUserService(tokenService tokens.TokenService, userRepository userRepository.UserRepositorer, tokenTTL time.Duration) UserService {
+	return &userServiceImpl{
 		tokenService:   tokenService,
 		userRepository: userRepository,
 		tokenTTL:       tokenTTL,

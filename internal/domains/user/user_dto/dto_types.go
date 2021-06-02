@@ -1,4 +1,4 @@
-package user_entity
+package user_dto
 
 type DTO interface {
 	ID() uint

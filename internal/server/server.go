@@ -11,7 +11,10 @@ type Server struct {
 }
 
 func (s *Server) Run() {
-	s.engine.Run()
+	err := s.engine.Run()
+	if err != nil {
+		panic(err.Error())
+	}
 }
 
 func Init(cradle *cradle.Cradle) *Server {

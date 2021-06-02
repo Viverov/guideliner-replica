@@ -14,7 +14,7 @@ type Cradle struct {
 	sqlDB *gorm.DB
 
 	// Services section
-	userService userService.UserServicer
+	userService userService.UserService
 }
 
 func (c *Cradle) GetConfig() *config.Config {
@@ -25,6 +25,6 @@ func (c *Cradle) GetSqlDB() *gorm.DB {
 	return c.sqlDB
 }
 
-func (c *Cradle) GetUserService() userService.UserServicer {
+func (c *Cradle) GetUserService() userService.UserService {
 	return c.userService
 }

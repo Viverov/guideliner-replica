@@ -15,7 +15,7 @@ type authJwtClaim struct {
 	jwt.StandardClaims
 }
 
-func NewTokenServiceJWT(secretKey string) TokenServicer {
+func NewTokenServiceJWT(secretKey string) TokenService {
 	return &tokenServiceJWT{
 		secretKey: secretKey,
 		issure:    "guideliner",
@@ -36,7 +36,7 @@ func (s *tokenServiceJWT) GenerateToken(userId uint, tokenTTL time.Duration) (st
 	//encoded string
 	t, err := token.SignedString([]byte(s.secretKey))
 	if err != nil {
-		return "", err
+		return "", &UnexpectedGenerateError{}
 	}
 	return t, nil
 }

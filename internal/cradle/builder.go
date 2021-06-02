@@ -14,7 +14,7 @@ type Builder struct {
 	sqlDB *gorm.DB
 
 	// Services section
-	userService us.UserServicer
+	userService us.UserService
 }
 
 func (c *Builder) SetConfig(cfg *config.Config) {
@@ -25,7 +25,7 @@ func (c *Builder) SetSqlDB(db *gorm.DB) {
 	c.sqlDB = db
 }
 
-func (c *Builder) SetUserService(service us.UserServicer) {
+func (c *Builder) SetUserService(service us.UserService) {
 	c.userService = service
 }
 

@@ -54,7 +54,7 @@ func TestValidateInvalidToken(t *testing.T) {
 	assert.EqualError(t, err, (&NotTokenError{token: token}).Error())
 }
 
-func setupTestData() (service TokenServicer, secretKey string, userId uint) {
+func setupTestData() (service TokenService, secretKey string, userId uint) {
 	secretKey = faker.Word()
 	numbers, _ := faker.RandomInt(1, 1000)
 	userId = uint(numbers[0])

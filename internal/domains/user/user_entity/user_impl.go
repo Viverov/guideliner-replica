@@ -1,7 +1,6 @@
 package user_entity
 
 import (
-	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
@@ -20,7 +19,7 @@ func (u *userImpl) SetPassword(password string) error {
 
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Something gone wrong on password generate: %s", err.Error()))
+		return fmt.Errorf("something gone wrong on password generate: %s", err.Error())
 	}
 
 	u.password = string(bytes)
@@ -62,8 +61,11 @@ func CreateUser(email string, password string) (User, error) {
 	}
 
 	u := &userImpl{}
-	u.SetEmail(email)
-	err := u.SetPassword(password)
+	err := u.SetEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	err = u.SetPassword(password)
 	if err != nil {
 		return nil, err
 	}

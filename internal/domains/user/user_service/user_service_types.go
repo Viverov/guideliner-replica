@@ -2,17 +2,17 @@ package user_service
 
 import (
 	"fmt"
-	userEntity "github.com/Viverov/guideliner/internal/domains/user/user_entity"
+	"github.com/Viverov/guideliner/internal/domains/user/user_dto"
 )
 
-type UserServicer interface {
-	FindById(id uint) (userEntity.DTO, error)
-	FindByEmail(email string) (userEntity.DTO, error)
-	Register(email string, password string) (userEntity.DTO, error)
+type UserService interface {
+	FindById(id uint) (user_dto.DTO, error)
+	FindByEmail(email string) (user_dto.DTO, error)
+	Register(email string, password string) (user_dto.DTO, error)
 	ValidateCredentials(email string, password string) (bool, error)
 	ChangePassword(userId uint, newPassword string) error
 	GetToken(userId uint) (string, error)
-	GetUserFromToken(token string) (userEntity.DTO, error)
+	GetUserFromToken(token string) (user_dto.DTO, error)
 }
 
 type InvalidNewArgsError struct {
