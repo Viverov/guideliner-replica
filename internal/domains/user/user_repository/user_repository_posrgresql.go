@@ -77,7 +77,7 @@ func (r *userRepositoryPostgresql) Update(u userEntity.User) error {
 	return nil
 }
 
-func NewUserRepositoryPostgresql(db *gorm.DB) UserRepositorer {
+func NewUserRepositoryPostgresql(db *gorm.DB) UserRepository {
 	return &userRepositoryPostgresql{
 		db: db,
 	}

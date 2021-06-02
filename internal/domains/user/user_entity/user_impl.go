@@ -51,7 +51,7 @@ func (u *userImpl) Email() string {
 	return u.email
 }
 
-// Create a new user. Receives email and unhashed password as input values, returns object without ID (will be set later in db / repository)
+// CreateUser receives email and unhashed password as input values, returns user object without ID (will be set later in db / repository)
 func CreateUser(email string, password string) (User, error) {
 	if len(email) == 0 {
 		return nil, &EmptyArgError{argName: argNameEmail}
@@ -73,7 +73,7 @@ func CreateUser(email string, password string) (User, error) {
 	return u, nil
 }
 
-// User contructor. Set ID = 0 for new user.
+// NewUser is user constructor. Use ID == 0 for new user.
 func NewUser(id uint, email string, password string) (User, error) {
 	if len(email) == 0 {
 		return nil, &EmptyArgError{argName: argNameEmail}

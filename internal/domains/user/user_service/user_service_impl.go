@@ -3,7 +3,6 @@ package user_service
 import (
 	"errors"
 	tokens "github.com/Viverov/guideliner/internal/domains/user/token_service"
-	"github.com/Viverov/guideliner/internal/domains/user/user_dto"
 	userEntity "github.com/Viverov/guideliner/internal/domains/user/user_entity"
 	userRepository "github.com/Viverov/guideliner/internal/domains/user/user_repository"
 	"time"
@@ -11,11 +10,11 @@ import (
 
 type userServiceImpl struct {
 	tokenService   tokens.TokenService
-	userRepository userRepository.UserRepositorer
+	userRepository userRepository.UserRepository
 	tokenTTL       time.Duration
 }
 
-func (u *userServiceImpl) FindById(id uint) (user_dto.DTO, error) {
+func (u *userServiceImpl) FindById(id uint) (userEntity.DTO, error) {
 	user, err := u.userRepository.FindOne(userRepository.FindCondition{
 		ID: id,
 	})
@@ -23,10 +22,10 @@ func (u *userServiceImpl) FindById(id uint) (user_dto.DTO, error) {
 		return nil, processRepositoryError(err)
 	}
 
-	return user_dto.NewDTO(user.ID(), user.Email()), nil
+	return userEntity.NewDTO(user.ID(), user.Email()), nil
 }
 
-func (u *userServiceImpl) FindByEmail(email string) (user_dto.DTO, error) {
+func (u *userServiceImpl) FindByEmail(email string) (userEntity.DTO, error) {
 	user, err := u.userRepository.FindOne(userRepository.FindCondition{
 		Email: email,
 	})
@@ -34,10 +33,10 @@ func (u *userServiceImpl) FindByEmail(email string) (user_dto.DTO, error) {
 		return nil, processRepositoryError(err)
 	}
 
-	return user_dto.NewDTO(user.ID(), user.Email()), nil
+	return userEntity.NewDTO(user.ID(), user.Email()), nil
 }
 
-func (u *userServiceImpl) Register(email string, password string) (user_dto.DTO, error) {
+func (u *userServiceImpl) Register(email string, password string) (userEntity.DTO, error) {
 	alreadyExistUser, err := u.FindByEmail(email)
 	if err != nil {
 		return nil, err
@@ -56,7 +55,7 @@ func (u *userServiceImpl) Register(email string, password string) (user_dto.DTO,
 	if err != nil {
 		return nil, processRepositoryError(err)
 	}
-	return user_dto.NewDTO(id, email), nil
+	return userEntity.NewDTO(id, email), nil
 }
 
 func (u *userServiceImpl) ValidateCredentials(email string, password string) (bool, error) {
@@ -104,7 +103,7 @@ func (u *userServiceImpl) GetToken(userId uint) (string, error) {
 	return token, nil
 }
 
-func (u *userServiceImpl) GetUserFromToken(token string) (user_dto.DTO, error) {
+func (u *userServiceImpl) GetUserFromToken(token string) (userEntity.DTO, error) {
 	claims, err := u.tokenService.ValidateToken(token)
 	if err != nil {
 		return nil, processTokenError(err)
@@ -118,10 +117,10 @@ func (u *userServiceImpl) GetUserFromToken(token string) (user_dto.DTO, error) {
 		return nil, processRepositoryError(err)
 	}
 
-	return user_dto.NewDTO(user.ID(), user.Email()), nil
+	return userEntity.NewDTO(user.ID(), user.Email()), nil
 }
 
-func NewUserService(tokenService tokens.TokenService, userRepository userRepository.UserRepositorer, tokenTTL time.Duration) UserService {
+func NewUserService(tokenService tokens.TokenService, userRepository userRepository.UserRepository, tokenTTL time.Duration) UserService {
 	return &userServiceImpl{
 		tokenService:   tokenService,
 		userRepository: userRepository,

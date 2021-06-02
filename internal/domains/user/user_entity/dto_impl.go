@@ -1,4 +1,4 @@
-package user_dto
+package user_entity
 
 type dtoImpl struct {
 	id    uint

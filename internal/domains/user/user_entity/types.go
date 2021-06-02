@@ -8,17 +8,17 @@ const (
 )
 
 type User interface {
-	// Set user email
+	// SetEmail sets user email
 	SetEmail(email string) error
-	// Hash & set new user password
+	// SetPassword hashes & sets new user password
 	SetPassword(password string) error
-	// Validate user password. Get unhashed password as input, return "true" for correct user password
+	// ValidatePassword receives raw password as input, returns "true" for correct user password
 	ValidatePassword(password string) (isValid bool)
-	// Get user ID
+	// ID returns user's ID
 	ID() uint
-	// Get user password
+	// Password returns user's password
 	Password() string
-	// Get user email
+	// Email returns user's email
 	Email() string
 }
 

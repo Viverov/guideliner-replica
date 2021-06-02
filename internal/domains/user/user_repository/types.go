@@ -5,7 +5,7 @@ import (
 	"github.com/Viverov/guideliner/internal/domains/user/user_entity"
 )
 
-type UserRepositorer interface {
+type UserRepository interface {
 	FindOne(condition FindCondition) (user_entity.User, error)
 	Insert(u user_entity.User) (id uint, err error)
 	Update(u user_entity.User) error
