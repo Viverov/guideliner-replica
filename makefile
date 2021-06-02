@@ -1,3 +1,6 @@
+lint:
+	golangci-lint run ./internal/... ./cmd/...
+
 fmt:
 	go fmt ./internal/... ./cmd/...
 
@@ -19,13 +22,16 @@ guideliner-run-development:
 guideliner-run-production:
 	GUIDELINER_ENV=production go run ./cmd/guildeliner/main.go
 
-guideliner-build:
+vendor:
+	go mod vendor
+
+guideliner-build: vendor
 	go build -o ./bin/guideliner -mod vendor ./cmd/guideliner/main.go
 
-migrations-build:
+migrations-build: vendor
 	go build -o ./bin/migrations -mod vendor  ./cmd/migrations/main.go
 
-clean-db-build:
+clean-db-build: vendor
 	go build -o ./bin/clean_db -mod vendor  ./cmd/clean_postgresql/main.go
 
 create-migration:

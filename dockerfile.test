@@ -1,0 +1,13 @@
+FROM golang:1.16
+
+# Install dependencies
+RUN apt-get update
+RUN apt-get install -y postgresql-client
+
+# Set env
+ENV GUIDELINER_ENV=test
+
+# Set workdir
+WORKDIR /app
+
+CMD ./cmd/sh/run_integration_tests.sh

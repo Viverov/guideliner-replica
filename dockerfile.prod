@@ -1,0 +1,15 @@
+FROM golang:1.16
+
+# Install dependencies
+RUN apt-get update
+RUN apt-get install -y postgresql-client postgresql
+
+# Set workdir
+WORKDIR /app
+
+COPY ./ /app/
+
+RUN make guideliner-build
+RUN make migrations-build
+
+CMD ./cmd/sh/run_app.sh
