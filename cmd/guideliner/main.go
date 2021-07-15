@@ -35,7 +35,7 @@ func main() {
 	cradleBuilder.SetSqlDB(dbInstance)
 
 	// Init services
-	cradleBuilder.SetUserService(user.NewUserService(cfg.Tokens.SecretKey, dbInstance))
+	cradleBuilder.SetUserService(user.BuildUserService(cfg.Tokens.SecretKey, dbInstance))
 
 	cradleObj := cradleBuilder.Build()
 	fmt.Println("Done!")

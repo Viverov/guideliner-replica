@@ -1,11 +1,11 @@
-package token_service
+package token_provider
 
 import (
 	"github.com/dgrijalva/jwt-go"
 	"time"
 )
 
-type tokenServiceJWT struct {
+type tokenProviderJWT struct {
 	secretKey string
 	issure    string
 }
@@ -15,14 +15,14 @@ type authJwtClaim struct {
 	jwt.StandardClaims
 }
 
-func NewTokenServiceJWT(secretKey string) TokenService {
-	return &tokenServiceJWT{
+func NewTokenServiceJWT(secretKey string) TokenProvider {
+	return &tokenProviderJWT{
 		secretKey: secretKey,
 		issure:    "guideliner",
 	}
 }
 
-func (s *tokenServiceJWT) GenerateToken(userId uint, tokenTTL time.Duration) (string, error) {
+func (s *tokenProviderJWT) GenerateToken(userId uint, tokenTTL time.Duration) (string, error) {
 	claims := &authJwtClaim{
 		userId,
 		jwt.StandardClaims{
@@ -41,7 +41,7 @@ func (s *tokenServiceJWT) GenerateToken(userId uint, tokenTTL time.Duration) (st
 	return t, nil
 }
 
-func (s *tokenServiceJWT) ValidateToken(encodedToken string) (*AuthClaims, error) {
+func (s *tokenProviderJWT) ValidateToken(encodedToken string) (*AuthClaims, error) {
 	token, err := jwt.ParseWithClaims(encodedToken, &authJwtClaim{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(s.secretKey), nil
 	})

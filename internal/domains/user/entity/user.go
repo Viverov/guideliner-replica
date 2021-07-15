@@ -1,11 +1,4 @@
-package user_entity
-
-import "fmt"
-
-const (
-	argNameEmail    = "Email"
-	argNamePassword = "Password"
-)
+package entity
 
 type User interface {
 	// SetEmail sets user email
@@ -20,12 +13,4 @@ type User interface {
 	Password() string
 	// Email returns user's email
 	Email() string
-}
-
-type EmptyArgError struct {
-	argName string
-}
-
-func (e *EmptyArgError) Error() string {
-	return fmt.Sprintf("%s must not be empty", e.argName)
 }

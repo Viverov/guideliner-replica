@@ -1,6 +1,6 @@
 // +build unit
 
-package user_entity
+package entity
 
 import (
 	"github.com/stretchr/testify/assert"

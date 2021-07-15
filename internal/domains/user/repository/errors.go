@@ -1,20 +1,8 @@
-package user_repository
+package repository
 
 import (
 	"fmt"
-	"github.com/Viverov/guideliner/internal/domains/user/user_entity"
 )
-
-type UserRepository interface {
-	FindOne(condition FindCondition) (user_entity.User, error)
-	Insert(u user_entity.User) (id uint, err error)
-	Update(u user_entity.User) error
-}
-
-type FindCondition struct {
-	ID    uint
-	Email string
-}
 
 type InvalidFindConditionError struct{}
 

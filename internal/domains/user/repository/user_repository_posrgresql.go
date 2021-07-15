@@ -1,7 +1,7 @@
-package user_repository
+package repository
 
 import (
-	userEntity "github.com/Viverov/guideliner/internal/domains/user/user_entity"
+	userEntity "github.com/Viverov/guideliner/internal/domains/user/entity"
 	"gorm.io/gorm"
 )
 

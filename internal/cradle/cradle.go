@@ -2,7 +2,7 @@ package cradle
 
 import (
 	"github.com/Viverov/guideliner/internal/config"
-	userService "github.com/Viverov/guideliner/internal/domains/user/user_service"
+	userService "github.com/Viverov/guideliner/internal/domains/user/service"
 	"gorm.io/gorm"
 )
 
