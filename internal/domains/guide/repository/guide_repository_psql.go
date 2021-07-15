@@ -5,15 +5,14 @@ import (
 	"gorm.io/gorm"
 )
 
-type guideModel struct {
-	gorm.Model
-	//CurrentMaxNodeId uint   `gorm:"not null"`
-	Description      string `gorm:"not null"`
-	NodesJson        string `gorm:"not null"`
-}
-
 type guideRepositoryPsql struct {
 	db *gorm.DB
+}
+
+type guideModel struct {
+	gorm.Model
+	Description      string `gorm:"not null"`
+	NodesJson        string `gorm:"not null"`
 }
 
 func NewGuideRepositoryPsql(db *gorm.DB) *guideRepositoryPsql {
@@ -37,7 +36,6 @@ func (r *guideRepositoryPsql) FindById(id uint) (entity.Guide, error) {
 		}
 	}
 
-	//return entity.NewGuideWithParams(gm.ID, gm.NodesJson, gm.Description, gm.CurrentMaxNodeId)
 	return entity.NewGuideWithParams(gm.ID, gm.NodesJson, gm.Description)
 }
 
@@ -73,7 +71,6 @@ func (r *guideRepositoryPsql) Insert(guide entity.Guide) (id uint, err error) {
 		return 0, err
 	}
 	gm := &guideModel{
-		//CurrentMaxNodeId: guide.CurrentMaxNodeId,
 		Description:      guide.Description(),
 		NodesJson:        nodesJson,
 	}
@@ -98,7 +95,6 @@ func (r *guideRepositoryPsql) Update(guide entity.Guide) error {
 		Model: gorm.Model{
 			ID: guide.ID(),
 		},
-		//CurrentMaxNodeId: guide.CurrentMaxNodeId(),
 		Description:      guide.Description(),
 		NodesJson:        nodesJson,
 	}
