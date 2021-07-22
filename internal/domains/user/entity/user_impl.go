@@ -12,6 +12,15 @@ type userImpl struct {
 	password string
 }
 
+func (u *userImpl) SetID(id uint) error {
+	if id == 0 {
+		return &InvalidIdError{}
+	}
+	u.id = id
+
+	return nil
+}
+
 func (u *userImpl) SetPassword(password string) error {
 	if len(password) == 0 {
 		return &EmptyArgError{argName: argNamePassword}

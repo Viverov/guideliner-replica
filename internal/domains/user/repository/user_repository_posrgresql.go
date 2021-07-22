@@ -11,8 +11,18 @@ type userModel struct {
 	Password string `gorm:"not null"`
 }
 
+func (u userModel) TableName() string {
+	return "users"
+}
+
 type userRepositoryPostgresql struct {
 	db *gorm.DB
+}
+
+func NewUserRepositoryPostgresql(db *gorm.DB) *userRepositoryPostgresql {
+	return &userRepositoryPostgresql{
+		db: db,
+	}
 }
 
 func (r *userRepositoryPostgresql) FindOne(condition FindCondition) (userEntity.User, error) {
@@ -75,10 +85,4 @@ func (r *userRepositoryPostgresql) Update(u userEntity.User) error {
 	}
 
 	return nil
-}
-
-func NewUserRepositoryPostgresql(db *gorm.DB) UserRepository {
-	return &userRepositoryPostgresql{
-		db: db,
-	}
 }

@@ -22,7 +22,7 @@ func (u *userServiceImpl) FindById(id uint) (userEntity.UserDTO, error) {
 		return nil, processRepositoryError(err)
 	}
 
-	return userEntity.NewUserDTO(user.ID(), user.Email()), nil
+	return userEntity.NewUserDTOFromEntity(user), nil
 }
 
 func (u *userServiceImpl) FindByEmail(email string) (userEntity.UserDTO, error) {
@@ -33,7 +33,7 @@ func (u *userServiceImpl) FindByEmail(email string) (userEntity.UserDTO, error) 
 		return nil, processRepositoryError(err)
 	}
 
-	return userEntity.NewUserDTO(user.ID(), user.Email()), nil
+	return userEntity.NewUserDTOFromEntity(user), nil
 }
 
 func (u *userServiceImpl) Register(email string, password string) (userEntity.UserDTO, error) {
@@ -55,7 +55,12 @@ func (u *userServiceImpl) Register(email string, password string) (userEntity.Us
 	if err != nil {
 		return nil, processRepositoryError(err)
 	}
-	return userEntity.NewUserDTO(id, email), nil
+	err = user.SetID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return userEntity.NewUserDTOFromEntity(user), nil
 }
 
 func (u *userServiceImpl) ValidateCredentials(email string, password string) (bool, error) {
@@ -117,7 +122,7 @@ func (u *userServiceImpl) GetUserFromToken(token string) (userEntity.UserDTO, er
 		return nil, processRepositoryError(err)
 	}
 
-	return userEntity.NewUserDTO(user.ID(), user.Email()), nil
+	return userEntity.NewUserDTOFromEntity(user), nil
 }
 
 func NewUserService(tokenService tokens.TokenProvider, userRepository userRepository.UserRepository, tokenTTL time.Duration) UserService {

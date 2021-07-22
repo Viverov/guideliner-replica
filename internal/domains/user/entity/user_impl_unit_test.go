@@ -218,6 +218,63 @@ func Test_userImpl_Password(t *testing.T) {
 	}
 }
 
+func Test_userImpl_SetID(t *testing.T) {
+	type fields struct {
+		id       uint
+		email    string
+		password string
+	}
+	type args struct {
+		id uint
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantID uint
+		wantErr error
+	}{
+		{
+			name:    "Should set new id",
+			fields:  fields{
+				id:       0,
+				email:    "",
+				password: "",
+			},
+			args:    args{id: 10},
+			wantID: 10,
+			wantErr: nil,
+		},
+		{
+			name:    "Should return new error for zero id",
+			fields:  fields{
+				id:       50,
+				email:    "",
+				password: "",
+			},
+			args:    args{id: 0},
+			wantID: 50,
+			wantErr: &InvalidIdError{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := &userImpl{
+				id:       tt.fields.id,
+				email:    tt.fields.email,
+				password: tt.fields.password,
+			}
+			err := u.SetID(tt.args.id)
+			if tt.wantErr == nil {
+				assert.Nil(t, err)
+			} else {
+				assert.EqualError(t, err, tt.wantErr.Error())
+			}
+			assert.Equal(t, tt.wantID, u.ID())
+		})
+	}
+}
+
 func Test_userImpl_SetEmail(t *testing.T) {
 	type fields struct {
 		id       uint
