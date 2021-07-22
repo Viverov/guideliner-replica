@@ -11,8 +11,8 @@ type guideRepositoryPsql struct {
 
 type guideModel struct {
 	gorm.Model
-	Description      string `gorm:"not null"`
-	NodesJson        string `gorm:"not null"`
+	Description string `gorm:"not null"`
+	NodesJson   string `gorm:"not null"`
 }
 
 func NewGuideRepositoryPsql(db *gorm.DB) *guideRepositoryPsql {
@@ -71,8 +71,8 @@ func (r *guideRepositoryPsql) Insert(guide entity.Guide) (id uint, err error) {
 		return 0, err
 	}
 	gm := &guideModel{
-		Description:      guide.Description(),
-		NodesJson:        nodesJson,
+		Description: guide.Description(),
+		NodesJson:   nodesJson,
 	}
 	result := r.db.Create(gm)
 
@@ -95,8 +95,8 @@ func (r *guideRepositoryPsql) Update(guide entity.Guide) error {
 		Model: gorm.Model{
 			ID: guide.ID(),
 		},
-		Description:      guide.Description(),
-		NodesJson:        nodesJson,
+		Description: guide.Description(),
+		NodesJson:   nodesJson,
 	}
 
 	result := r.db.Save(gm)
