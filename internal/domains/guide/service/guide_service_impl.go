@@ -63,7 +63,15 @@ func (s *guideServiceImpl) Create(description string, nodesJson string) (entity.
 		return nil, processRepositoryError(err)
 	}
 
-	dto := entity.NewGuideDTO(id, guide.Description(), nodesJson)
+	err = guide.SetID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	dto, err := entity.NewGuideDTOFromEntity(guide)
+	if err != nil {
+		return nil, err
+	}
 
 	return dto, nil
 }
