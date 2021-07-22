@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	userEntity "github.com/Viverov/guideliner/internal/domains/user/entity"
 	"gorm.io/gorm"
 )
@@ -37,8 +38,12 @@ func (r *userRepositoryPostgresql) FindOne(condition FindCondition) (userEntity.
 		Email: condition.Email,
 	}
 
-	result := r.db.Find(um)
+	result := r.db.Where(um).First(um)
 	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
 		return nil, &CommonRepositoryError{
 			action:    "find",
 			errorText: result.Error.Error(),
@@ -50,6 +55,14 @@ func (r *userRepositoryPostgresql) FindOne(condition FindCondition) (userEntity.
 }
 
 func (r *userRepositoryPostgresql) Insert(u userEntity.User) (id uint, err error) {
+	alreadyExistsUser, err := r.FindOne(FindCondition{Email: u.Email()})
+	if err != nil {
+		return 0, err
+	}
+	if alreadyExistsUser != nil {
+		return 0, &UserAlreadyExistsError{}
+	}
+
 	um := &userModel{
 		Email:    u.Email(),
 		Password: u.Password(),

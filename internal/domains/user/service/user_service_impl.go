@@ -46,9 +46,13 @@ func (u *userServiceImpl) Register(email string, password string) (userEntity.Us
 		return nil, &EmailAlreadyExistError{}
 	}
 
-	user, err := userEntity.CreateUser(email, password)
+	user, err := userEntity.NewUser(0, email, "")
 	if err != nil {
 		return nil, &UnexpectedServiceError{}
+	}
+	err = user.SetPassword(password)
+	if err != nil {
+		return nil, err
 	}
 
 	id, err := u.userRepository.Insert(user)

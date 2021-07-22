@@ -18,3 +18,9 @@ type CommonRepositoryError struct {
 func (c *CommonRepositoryError) Error() string {
 	return fmt.Sprintf("Error occured while %s: %s", c.action, c.errorText)
 }
+
+type UserAlreadyExistsError struct{}
+
+func (u *UserAlreadyExistsError) Error() string {
+	return "The user already exists"
+}

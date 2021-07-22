@@ -49,12 +49,12 @@ func Test_userDTOImpl_Email(t *testing.T) {
 		want   string
 	}{
 		{
-			name:   "Should return email",
+			name: "Should return email",
 			fields: fields{
 				id:    10,
 				email: "example@email.com",
 			},
-			want:   "example@email.com",
+			want: "example@email.com",
 		},
 	}
 	for _, tt := range tests {
@@ -79,12 +79,12 @@ func Test_userDTOImpl_ID(t *testing.T) {
 		want   uint
 	}{
 		{
-			name:   "Should return ID",
+			name: "Should return ID",
 			fields: fields{
 				id:    10,
 				email: "test@test.com",
 			},
-			want:   10,
+			want: 10,
 		},
 	}
 	for _, tt := range tests {

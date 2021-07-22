@@ -12,6 +12,17 @@ type userImpl struct {
 	password string
 }
 
+// NewUser is user constructor. Use ID == 0 for new user.
+func NewUser(id uint, email string, password string) (User, error) {
+	if len(email) == 0 {
+		return nil, &EmptyArgError{argName: argNameEmail}
+	}
+	if len(password) == 0 {
+		return nil, &EmptyArgError{argName: argNamePassword}
+	}
+	return &userImpl{id, strings.ToLower(email), password}, nil
+}
+
 func (u *userImpl) SetID(id uint) error {
 	if id == 0 {
 		return &InvalidIdError{}
@@ -58,37 +69,4 @@ func (u *userImpl) Password() string {
 
 func (u *userImpl) Email() string {
 	return u.email
-}
-
-// CreateUser receives email and unhashed password as input values, returns user object without ID (will be set later in db / repository)
-func CreateUser(email string, password string) (User, error) {
-	if len(email) == 0 {
-		return nil, &EmptyArgError{argName: argNameEmail}
-	}
-	if len(password) == 0 {
-		return nil, &EmptyArgError{argName: argNamePassword}
-	}
-
-	u := &userImpl{}
-	err := u.SetEmail(email)
-	if err != nil {
-		return nil, err
-	}
-	err = u.SetPassword(password)
-	if err != nil {
-		return nil, err
-	}
-
-	return u, nil
-}
-
-// NewUser is user constructor. Use ID == 0 for new user.
-func NewUser(id uint, email string, password string) (User, error) {
-	if len(email) == 0 {
-		return nil, &EmptyArgError{argName: argNameEmail}
-	}
-	if len(password) == 0 {
-		return nil, &EmptyArgError{argName: argNamePassword}
-	}
-	return &userImpl{id, strings.ToLower(email), password}, nil
 }

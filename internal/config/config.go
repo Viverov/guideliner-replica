@@ -48,17 +48,17 @@ func InitConfig(env string, jsonPath string) *Config {
 		resolvedEnv != EnvProduction {
 		panic(fmt.Sprintf("Env set, but by undefined mode: %s\n", env))
 	}
-	log(env,"Resolve %s mode\n", resolvedEnv)
+	log(env, "Resolve %s mode\n", resolvedEnv)
 	cfg.Env = resolvedEnv
 
 	if resolvedEnv == EnvDebug || resolvedEnv == EnvTest || resolvedEnv == EnvDevelopment {
 		log(env, "In %s mode, application can process with json and env config\n", resolvedEnv)
 		if jsonPath == "" {
-			log(env,"But, jsonPath not provided, skip JSON step\n")
+			log(env, "But, jsonPath not provided, skip JSON step\n")
 		} else {
 			log(env, "Process JSON...\n")
 			readFile(env, cfg, jsonPath)
-			log(env,"Done!\n")
+			log(env, "Done!\n")
 		}
 	} else {
 		log(env, "In %s mode, application can process only by env config\n", resolvedEnv)
@@ -66,14 +66,14 @@ func InitConfig(env string, jsonPath string) *Config {
 
 	log(env, "Process ENV...\n")
 	readEnv(cfg)
-	log(env,"Done!\n")
+	log(env, "Done!\n")
 
-	log(env,"Validate config...\n")
+	log(env, "Validate config...\n")
 	err := validator.New().Struct(cfg)
 	if err != nil {
 		panic(err)
 	}
-	log(env,"Done!\n")
+	log(env, "Done!\n")
 
 	return cfg
 }
@@ -81,7 +81,7 @@ func InitConfig(env string, jsonPath string) *Config {
 func readFile(env string, cfg *Config, jsonPath string) {
 	f, err := os.Open(jsonPath)
 	if err != nil {
-		log(env,"Probles occured while file opening: %s", err.Error())
+		log(env, "Probles occured while file opening: %s", err.Error())
 		return
 	}
 	defer f.Close()
@@ -100,7 +100,7 @@ func readEnv(cfg *Config) {
 	}
 }
 
-func log(env string, format string, args... interface{}) {
+func log(env string, format string, args ...interface{}) {
 	if env == EnvTest {
 		return
 	}
