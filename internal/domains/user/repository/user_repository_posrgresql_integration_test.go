@@ -153,7 +153,7 @@ func Test_userRepositoryPostgresql_FindOne(t *testing.T) {
 	}
 
 	// Clean up (after all)
-	dbInstance.Where("1 = 1").Delete(&userModel{})
+	dbInstance.Unscoped().Where("1 = 1").Delete(&userModel{})
 }
 
 func Test_userRepositoryPostgresql_Insert(t *testing.T) {
@@ -221,39 +221,106 @@ func Test_userRepositoryPostgresql_Insert(t *testing.T) {
 
 			// Clean up (after each)
 			if gotId != 0 {
-				dbInstance.Where("id = ?", gotId).Delete(&userModel{})
+				dbInstance.Unscoped().Where("id = ?", gotId).Delete(&userModel{})
 			}
 		})
 	}
 
 	// Clean up (after all)
-	dbInstance.Where("1 = 1").Delete(&userModel{})
+	dbInstance.Unscoped().Where("1 = 1").Delete(&userModel{})
 }
 
-//
-//func Test_userRepositoryPostgresql_Update(t *testing.T) {
-//	type fields struct {
-//		db *gorm.DB
-//	}
-//	type args struct {
-//		u entity.User
-//	}
-//	tests := []struct {
-//		name    string
-//		fields  fields
-//		args    args
-//		wantErr bool
-//	}{
-//		// TODO: Add test cases.
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			r := &userRepositoryPostgresql{
-//				db: tt.fields.db,
-//			}
-//			if err := r.Update(tt.args.u); (err != nil) != tt.wantErr {
-//				t.Errorf("Update() error = %v, wantErr %v", err, tt.wantErr)
-//			}
-//		})
-//	}
-//}
+func Test_userRepositoryPostgresql_Update(t *testing.T) {
+	tests := []struct {
+		name    string
+		existsUserData userData
+		updatedUserData    userData
+		wantErr error
+	}{
+		{
+			name:    "Should update data",
+			existsUserData: userData{
+				id: 10,
+				email: "old_email@test.com",
+				password: "old_password",
+			},
+			updatedUserData: userData{
+				id: 10,
+				email:    "new_email@test.com",
+				password: "new_password",
+			},
+			wantErr: nil,
+		},
+		{
+			name:    "Should return error for user with zero-ID (not inserted)",
+			existsUserData: userData{
+				id: 10,
+				email: "old_email@test.com",
+				password: "old_password",
+			},
+			updatedUserData: userData{
+				id: 0,
+				email:    "new_email@test.com",
+				password: "new_password",
+			},
+			wantErr: &InvalidIdError{},
+		},
+		{
+			name:    "Should return error for unexisting user",
+			existsUserData: userData{
+				id: 10,
+				email: "old_email@test.com",
+				password: "old_password",
+			},
+			updatedUserData: userData{
+				id: 15,
+				email:    "new_email@test.com",
+				password: "new_password",
+			},
+			wantErr: &UserNotFoundError{},
+		},
+	}
+		for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Setup (Before each)
+			dbInstance.Create(&userModel{
+				Model:    gorm.Model{ID: tt.existsUserData.id},
+				Email:    tt.existsUserData.email,
+				Password: tt.existsUserData.password,
+			})
+
+			// Actions
+			r := &userRepositoryPostgresql{
+				db: dbInstance,
+			}
+			user, err := entity.NewUser(tt.updatedUserData.id, tt.updatedUserData.email, tt.updatedUserData.password)
+			assert.Nil(t, err, "Invalid Test: user entity can't be created by new")
+
+			err = r.Update(user)
+			if tt.wantErr == nil {
+				assert.Nil(t, err)
+			} else {
+				assert.EqualError(t, err, tt.wantErr.Error())
+			}
+
+			userFromDB := &userModel{
+				Model: gorm.Model{
+					ID: tt.existsUserData.id,
+				},
+			}
+			result := dbInstance.Where(userFromDB).First(userFromDB)
+			assert.Nil(t, result.Error)
+
+			if tt.wantErr == nil {
+				assert.Equal(t, tt.updatedUserData.email, userFromDB.Email)
+				assert.Equal(t, tt.updatedUserData.password, userFromDB.Password)
+			} else {
+				assert.Equal(t, tt.existsUserData.email, userFromDB.Email)
+				assert.Equal(t, tt.existsUserData.password, userFromDB.Password)
+			}
+
+			// Clean up (After each)
+			dbInstance.Unscoped().Where("1 = 1").Delete(&userModel{})
+		})
+	}
+}

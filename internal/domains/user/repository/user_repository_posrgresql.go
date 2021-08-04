@@ -80,6 +80,18 @@ func (r *userRepositoryPostgresql) Insert(u userEntity.User) (id uint, err error
 }
 
 func (r *userRepositoryPostgresql) Update(u userEntity.User) error {
+	if u.ID() == 0 {
+		return &InvalidIdError{}
+	}
+
+	user, err := r.FindOne(FindCondition{ID: u.ID()})
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return &UserNotFoundError{}
+	}
+
 	um := &userModel{
 		Model: gorm.Model{
 			ID: u.ID(),
@@ -89,7 +101,6 @@ func (r *userRepositoryPostgresql) Update(u userEntity.User) error {
 	}
 
 	result := r.db.Save(um)
-
 	if result.Error != nil {
 		return &CommonRepositoryError{
 			action:    "update",
