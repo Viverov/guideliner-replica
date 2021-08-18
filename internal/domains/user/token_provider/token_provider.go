@@ -1,4 +1,4 @@
-package token_provider
+package tokenprovider
 
 import (
 	"time"
@@ -10,7 +10,7 @@ type TokenProvider interface {
 }
 
 type AuthClaims struct {
-	UserId    uint   `json:"userId"`
+	UserID    uint   `json:"userId"`
 	Audience  string `json:"aud,omitempty"`
 	ExpiresAt int64  `json:"exp,omitempty"`
 	Id        string `json:"jti,omitempty"`

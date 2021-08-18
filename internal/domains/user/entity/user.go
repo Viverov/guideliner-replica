@@ -1,10 +1,12 @@
 package entity
 
 type User interface {
-	// SetEmail sets user email
+	// SetID sets user's ID
+	SetID(id uint) error
+	// SetEmail sets user's email
 	SetEmail(email string) error
-	// SetPassword hashes & sets new user password
-	SetPassword(password string) error
+	// CryptAndSetPassword crypts & sets new user's password
+	CryptAndSetPassword(password string) error
 	// ValidatePassword receives raw password as input, returns "true" for correct user password
 	ValidatePassword(password string) (isValid bool)
 	// ID returns user's ID

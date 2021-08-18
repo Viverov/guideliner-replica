@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	userEntity "github.com/Viverov/guideliner/internal/domains/user/entity"
 	"gorm.io/gorm"
 )
@@ -11,8 +12,18 @@ type userModel struct {
 	Password string `gorm:"not null"`
 }
 
+func (u userModel) TableName() string {
+	return "users"
+}
+
 type userRepositoryPostgresql struct {
 	db *gorm.DB
+}
+
+func NewUserRepositoryPostgresql(db *gorm.DB) *userRepositoryPostgresql {
+	return &userRepositoryPostgresql{
+		db: db,
+	}
 }
 
 func (r *userRepositoryPostgresql) FindOne(condition FindCondition) (userEntity.User, error) {
@@ -27,11 +38,15 @@ func (r *userRepositoryPostgresql) FindOne(condition FindCondition) (userEntity.
 		Email: condition.Email,
 	}
 
-	result := r.db.Find(um)
+	result := r.db.Where(um).First(um)
 	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
 		return nil, &CommonRepositoryError{
-			action:    "find",
-			errorText: result.Error.Error(),
+			Action:    "find",
+			ErrorText: result.Error.Error(),
 		}
 	}
 
@@ -40,6 +55,14 @@ func (r *userRepositoryPostgresql) FindOne(condition FindCondition) (userEntity.
 }
 
 func (r *userRepositoryPostgresql) Insert(u userEntity.User) (id uint, err error) {
+	alreadyExistsUser, err := r.FindOne(FindCondition{Email: u.Email()})
+	if err != nil {
+		return 0, err
+	}
+	if alreadyExistsUser != nil {
+		return 0, &UserAlreadyExistsError{}
+	}
+
 	um := &userModel{
 		Email:    u.Email(),
 		Password: u.Password(),
@@ -48,8 +71,8 @@ func (r *userRepositoryPostgresql) Insert(u userEntity.User) (id uint, err error
 
 	if result.Error != nil {
 		return 0, &CommonRepositoryError{
-			action:    "create",
-			errorText: result.Error.Error(),
+			Action:    "create",
+			ErrorText: result.Error.Error(),
 		}
 	}
 
@@ -57,6 +80,18 @@ func (r *userRepositoryPostgresql) Insert(u userEntity.User) (id uint, err error
 }
 
 func (r *userRepositoryPostgresql) Update(u userEntity.User) error {
+	if u.ID() == 0 {
+		return &InvalidIdError{}
+	}
+
+	user, err := r.FindOne(FindCondition{ID: u.ID()})
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return &UserNotFoundError{}
+	}
+
 	um := &userModel{
 		Model: gorm.Model{
 			ID: u.ID(),
@@ -66,19 +101,12 @@ func (r *userRepositoryPostgresql) Update(u userEntity.User) error {
 	}
 
 	result := r.db.Save(um)
-
 	if result.Error != nil {
 		return &CommonRepositoryError{
-			action:    "update",
-			errorText: result.Error.Error(),
+			Action:    "update",
+			ErrorText: result.Error.Error(),
 		}
 	}
 
 	return nil
-}
-
-func NewUserRepositoryPostgresql(db *gorm.DB) UserRepository {
-	return &userRepositoryPostgresql{
-		db: db,
-	}
 }

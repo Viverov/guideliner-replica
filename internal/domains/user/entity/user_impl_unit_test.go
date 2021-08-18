@@ -8,63 +8,6 @@ import (
 	"testing"
 )
 
-func TestCreateUser(t *testing.T) {
-	type args struct {
-		email    string
-		password string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    User
-		wantErr error
-	}{
-		{
-			name:    "Correct",
-			args:    args{email: "email", password: "1234567890"},
-			want:    &userImpl{email: "email"},
-			wantErr: nil,
-		},
-		{
-			name:    "Should lowercase email",
-			args:    args{email: "EmAiL@eMaIl.com", password: "1234567890"},
-			want:    &userImpl{email: "email@email.com"},
-			wantErr: nil,
-		},
-		{
-			name:    "Empty email",
-			args:    args{email: "", password: "1234567890"},
-			want:    nil,
-			wantErr: &EmptyArgError{argName: argNameEmail},
-		},
-		{
-			name:    "Empty Password",
-			args:    args{email: "Email", password: ""},
-			want:    nil,
-			wantErr: &EmptyArgError{argName: argNamePassword},
-		},
-		{
-			name:    "Empty email and password",
-			args:    args{email: "", password: ""},
-			want:    nil,
-			wantErr: &EmptyArgError{argName: argNameEmail},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := CreateUser(tt.args.email, tt.args.password)
-
-			if tt.wantErr == nil {
-				assert.Nil(t, err)
-				assert.Equal(t, strings.ToLower(tt.want.Email()), got.Email())
-				assert.True(t, got.ValidatePassword(tt.args.password))
-			} else {
-				assert.EqualError(t, err, tt.wantErr.Error())
-			}
-		})
-	}
-}
-
 func TestNewUser(t *testing.T) {
 	type args struct {
 		id       uint
@@ -218,6 +161,63 @@ func Test_userImpl_Password(t *testing.T) {
 	}
 }
 
+func Test_userImpl_SetID(t *testing.T) {
+	type fields struct {
+		id       uint
+		email    string
+		password string
+	}
+	type args struct {
+		id uint
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantID  uint
+		wantErr error
+	}{
+		{
+			name: "Should set new id",
+			fields: fields{
+				id:       0,
+				email:    "",
+				password: "",
+			},
+			args:    args{id: 10},
+			wantID:  10,
+			wantErr: nil,
+		},
+		{
+			name: "Should return new error for zero id",
+			fields: fields{
+				id:       50,
+				email:    "",
+				password: "",
+			},
+			args:    args{id: 0},
+			wantID:  50,
+			wantErr: &InvalidIdError{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := &userImpl{
+				id:       tt.fields.id,
+				email:    tt.fields.email,
+				password: tt.fields.password,
+			}
+			err := u.SetID(tt.args.id)
+			if tt.wantErr == nil {
+				assert.Nil(t, err)
+			} else {
+				assert.EqualError(t, err, tt.wantErr.Error())
+			}
+			assert.Equal(t, tt.wantID, u.ID())
+		})
+	}
+}
+
 func Test_userImpl_SetEmail(t *testing.T) {
 	type fields struct {
 		id       uint
@@ -282,7 +282,7 @@ func Test_userImpl_SetEmail(t *testing.T) {
 	}
 }
 
-func Test_userImpl_SetPassword(t *testing.T) {
+func Test_userImpl_CryptAndSetPassword(t *testing.T) {
 	type fields struct {
 		id       uint
 		email    string
@@ -329,7 +329,7 @@ func Test_userImpl_SetPassword(t *testing.T) {
 				email:    tt.fields.email,
 				password: tt.fields.password,
 			}
-			err := u.SetPassword(tt.args.password)
+			err := u.CryptAndSetPassword(tt.args.password)
 
 			if tt.wantErr == nil {
 				assert.Nil(t, err)
@@ -343,14 +343,6 @@ func Test_userImpl_SetPassword(t *testing.T) {
 }
 
 func Test_userImpl_ValidatePassword(t *testing.T) {
-	type fields struct {
-		id       uint
-		email    string
-		password string
-	}
-	type args struct {
-		password string
-	}
 	tests := []struct {
 		name           string
 		password       string
@@ -377,7 +369,7 @@ func Test_userImpl_ValidatePassword(t *testing.T) {
 				email: "example@email.com",
 			}
 			// Set & hash password
-			_ = u.SetPassword(tt.password)
+			_ = u.CryptAndSetPassword(tt.password)
 			assert.Equal(t, tt.wantIsValid, u.ValidatePassword(tt.passedPassword))
 		})
 	}

@@ -1,14 +1,17 @@
 lint:
-	golangci-lint run ./internal/... ./cmd/...
+	golangci-lint run ./internal/... ./cmd/... --build-tags="unit integration"
 
 fmt:
 	go fmt ./internal/... ./cmd/...
 
-tests-unit:
+generate:
+	go generate ./...
+
+tests-unit: generate
 	go test ./internal/... --tags=unit
 
-tests-integration:
-	go test ./internal/... --tags=integration
+tests-integration: generate
+	go test -p 1 ./internal/... --tags=integration
 
 tests-integration-in-docker:
 	./cmd/sh/run_integration_tests_by_docker.sh
