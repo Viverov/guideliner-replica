@@ -1,6 +1,6 @@
 // +build unit
 
-package token_provider
+package tokenprovider
 
 import (
 	"github.com/bxcodec/faker/v3"
@@ -28,7 +28,7 @@ func TestValidateToken(t *testing.T) {
 	claims, err := jwtService.ValidateToken(token)
 
 	assert.Nil(t, err)
-	assert.Equal(t, claims.UserId, userId)
+	assert.Equal(t, claims.UserID, userId)
 }
 
 func TestValidateTokenExpired(t *testing.T) {

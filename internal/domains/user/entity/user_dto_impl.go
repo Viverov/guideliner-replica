@@ -5,6 +5,13 @@ type userDTOImpl struct {
 	email string
 }
 
+func NewUserDTO(id uint, email string) *userDTOImpl {
+	return &userDTOImpl{
+		id:    id,
+		email: email,
+	}
+}
+
 func NewUserDTOFromEntity(user User) *userDTOImpl {
 	return &userDTOImpl{
 		id:    user.ID(),

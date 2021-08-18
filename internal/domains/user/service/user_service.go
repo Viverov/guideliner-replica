@@ -9,5 +9,5 @@ type UserService interface {
 	ValidateCredentials(email string, password string) (bool, error)
 	ChangePassword(userId uint, newPassword string) error
 	GetToken(userId uint) (string, error)
-	GetUserFromToken(token string) (entity.UserDTO, error)
+	GetUserByToken(token string) (entity.UserDTO, error)
 }

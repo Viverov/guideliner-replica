@@ -45,8 +45,8 @@ func (r *userRepositoryPostgresql) FindOne(condition FindCondition) (userEntity.
 		}
 
 		return nil, &CommonRepositoryError{
-			action:    "find",
-			errorText: result.Error.Error(),
+			Action:    "find",
+			ErrorText: result.Error.Error(),
 		}
 	}
 
@@ -71,8 +71,8 @@ func (r *userRepositoryPostgresql) Insert(u userEntity.User) (id uint, err error
 
 	if result.Error != nil {
 		return 0, &CommonRepositoryError{
-			action:    "create",
-			errorText: result.Error.Error(),
+			Action:    "create",
+			ErrorText: result.Error.Error(),
 		}
 	}
 
@@ -103,8 +103,8 @@ func (r *userRepositoryPostgresql) Update(u userEntity.User) error {
 	result := r.db.Save(um)
 	if result.Error != nil {
 		return &CommonRepositoryError{
-			action:    "update",
-			errorText: result.Error.Error(),
+			Action:    "update",
+			ErrorText: result.Error.Error(),
 		}
 	}
 

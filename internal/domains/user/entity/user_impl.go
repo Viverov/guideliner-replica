@@ -12,15 +12,30 @@ type userImpl struct {
 	password string
 }
 
-// NewUser is user constructor. Use ID == 0 for new user.
-func NewUser(id uint, email string, password string) (User, error) {
+// NewUser is user constructor. Use ID == 0 for new user, not saved in DB.
+func NewUser(id uint, email string, hashedPassword string) (*userImpl, error) {
 	if len(email) == 0 {
 		return nil, &EmptyArgError{argName: argNameEmail}
 	}
-	if len(password) == 0 {
+	if len(hashedPassword) == 0 {
 		return nil, &EmptyArgError{argName: argNamePassword}
 	}
-	return &userImpl{id, strings.ToLower(email), password}, nil
+	return &userImpl{id, strings.ToLower(email), hashedPassword}, nil
+}
+
+// NewUserWithRawPassword is user constructor for non-crypted password. Use ID == 0 for new user, not saved in DB
+func NewUserWithRawPassword(id uint, email string, rawPassword string) (*userImpl, error) {
+	u, err := NewUser(id, email, rawPassword)
+	if err != nil {
+		return nil, err
+	}
+
+	err = u.CryptAndSetPassword(rawPassword)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }
 
 func (u *userImpl) SetID(id uint) error {
@@ -32,17 +47,13 @@ func (u *userImpl) SetID(id uint) error {
 	return nil
 }
 
-func (u *userImpl) SetPassword(password string) error {
-	if len(password) == 0 {
-		return &EmptyArgError{argName: argNamePassword}
-	}
-
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+func (u *userImpl) CryptAndSetPassword(password string) error {
+	cryptedPassword, err := cryptPassword(password)
 	if err != nil {
-		return fmt.Errorf("something gone wrong on password generate: %s", err.Error())
+		return err
 	}
 
-	u.password = string(bytes)
+	u.password = cryptedPassword
 	return nil
 }
 
@@ -69,4 +80,17 @@ func (u *userImpl) Password() string {
 
 func (u *userImpl) Email() string {
 	return u.email
+}
+
+func cryptPassword(password string) (string, error) {
+	if len(password) == 0 {
+		return "", &EmptyArgError{argName: argNamePassword}
+	}
+
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	if err != nil {
+		return "", fmt.Errorf("something gone wrong on password generate: %s", err.Error())
+	}
+
+	return string(bytes), nil
 }

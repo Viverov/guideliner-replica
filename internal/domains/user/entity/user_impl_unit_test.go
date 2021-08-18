@@ -282,7 +282,7 @@ func Test_userImpl_SetEmail(t *testing.T) {
 	}
 }
 
-func Test_userImpl_SetPassword(t *testing.T) {
+func Test_userImpl_CryptAndSetPassword(t *testing.T) {
 	type fields struct {
 		id       uint
 		email    string
@@ -329,7 +329,7 @@ func Test_userImpl_SetPassword(t *testing.T) {
 				email:    tt.fields.email,
 				password: tt.fields.password,
 			}
-			err := u.SetPassword(tt.args.password)
+			err := u.CryptAndSetPassword(tt.args.password)
 
 			if tt.wantErr == nil {
 				assert.Nil(t, err)
@@ -343,14 +343,6 @@ func Test_userImpl_SetPassword(t *testing.T) {
 }
 
 func Test_userImpl_ValidatePassword(t *testing.T) {
-	type fields struct {
-		id       uint
-		email    string
-		password string
-	}
-	type args struct {
-		password string
-	}
 	tests := []struct {
 		name           string
 		password       string
@@ -377,7 +369,7 @@ func Test_userImpl_ValidatePassword(t *testing.T) {
 				email: "example@email.com",
 			}
 			// Set & hash password
-			_ = u.SetPassword(tt.password)
+			_ = u.CryptAndSetPassword(tt.password)
 			assert.Equal(t, tt.wantIsValid, u.ValidatePassword(tt.passedPassword))
 		})
 	}

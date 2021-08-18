@@ -4,14 +4,6 @@ import (
 	"fmt"
 )
 
-type InvalidNewArgsError struct {
-	argsName []string
-}
-
-func (e *InvalidNewArgsError) Error() string {
-	return fmt.Sprintf("Invalid new args: %v", e.argsName)
-}
-
 type EmailAlreadyExistError struct{}
 
 func (e *EmailAlreadyExistError) Error() string {
@@ -30,4 +22,16 @@ type StorageError struct {
 
 func (s *StorageError) Error() string {
 	return fmt.Sprintf("Storage error: %s", s.storageErrorText)
+}
+
+type UserNotFoundError struct {
+	id uint
+}
+
+func (e *UserNotFoundError) Error() string {
+	if e.id != 0 {
+		return fmt.Sprintf("User with id %d not found", e.id)
+	}
+
+	return "User not found"
 }

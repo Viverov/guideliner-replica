@@ -232,55 +232,55 @@ func Test_userRepositoryPostgresql_Insert(t *testing.T) {
 
 func Test_userRepositoryPostgresql_Update(t *testing.T) {
 	tests := []struct {
-		name    string
-		existsUserData userData
-		updatedUserData    userData
-		wantErr error
+		name            string
+		existsUserData  userData
+		updatedUserData userData
+		wantErr         error
 	}{
 		{
-			name:    "Should update data",
+			name: "Should update data",
 			existsUserData: userData{
-				id: 10,
-				email: "old_email@test.com",
+				id:       10,
+				email:    "old_email@test.com",
 				password: "old_password",
 			},
 			updatedUserData: userData{
-				id: 10,
+				id:       10,
 				email:    "new_email@test.com",
 				password: "new_password",
 			},
 			wantErr: nil,
 		},
 		{
-			name:    "Should return error for user with zero-ID (not inserted)",
+			name: "Should return error for user with zero-ID (not inserted)",
 			existsUserData: userData{
-				id: 10,
-				email: "old_email@test.com",
+				id:       10,
+				email:    "old_email@test.com",
 				password: "old_password",
 			},
 			updatedUserData: userData{
-				id: 0,
+				id:       0,
 				email:    "new_email@test.com",
 				password: "new_password",
 			},
 			wantErr: &InvalidIdError{},
 		},
 		{
-			name:    "Should return error for unexisting user",
+			name: "Should return error for unexisting user",
 			existsUserData: userData{
-				id: 10,
-				email: "old_email@test.com",
+				id:       10,
+				email:    "old_email@test.com",
 				password: "old_password",
 			},
 			updatedUserData: userData{
-				id: 15,
+				id:       15,
 				email:    "new_email@test.com",
 				password: "new_password",
 			},
 			wantErr: &UserNotFoundError{},
 		},
 	}
-		for _, tt := range tests {
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Setup (Before each)
 			dbInstance.Create(&userModel{

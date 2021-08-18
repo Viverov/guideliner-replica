@@ -1,17 +1,25 @@
 package service
 
 import (
-	"errors"
 	userEntity "github.com/Viverov/guideliner/internal/domains/user/entity"
 	userRepository "github.com/Viverov/guideliner/internal/domains/user/repository"
 	tokens "github.com/Viverov/guideliner/internal/domains/user/token_provider"
+	"strings"
 	"time"
 )
 
 type userServiceImpl struct {
-	tokenService   tokens.TokenProvider
+	tokenProvider  tokens.TokenProvider
 	userRepository userRepository.UserRepository
 	tokenTTL       time.Duration
+}
+
+func NewUserService(tokenService tokens.TokenProvider, userRepository userRepository.UserRepository, tokenTTL time.Duration) UserService {
+	return &userServiceImpl{
+		tokenProvider:  tokenService,
+		userRepository: userRepository,
+		tokenTTL:       tokenTTL,
+	}
 }
 
 func (u *userServiceImpl) FindById(id uint) (userEntity.UserDTO, error) {
@@ -21,16 +29,22 @@ func (u *userServiceImpl) FindById(id uint) (userEntity.UserDTO, error) {
 	if err != nil {
 		return nil, processRepositoryError(err)
 	}
+	if user == nil {
+		return nil, nil
+	}
 
 	return userEntity.NewUserDTOFromEntity(user), nil
 }
 
 func (u *userServiceImpl) FindByEmail(email string) (userEntity.UserDTO, error) {
 	user, err := u.userRepository.FindOne(userRepository.FindCondition{
-		Email: email,
+		Email: strings.ToLower(email),
 	})
 	if err != nil {
 		return nil, processRepositoryError(err)
+	}
+	if user == nil {
+		return nil, nil
 	}
 
 	return userEntity.NewUserDTOFromEntity(user), nil
@@ -46,13 +60,9 @@ func (u *userServiceImpl) Register(email string, password string) (userEntity.Us
 		return nil, &EmailAlreadyExistError{}
 	}
 
-	user, err := userEntity.NewUser(0, email, "")
+	user, err := userEntity.NewUserWithRawPassword(0, email, password)
 	if err != nil {
 		return nil, &UnexpectedServiceError{}
-	}
-	err = user.SetPassword(password)
-	if err != nil {
-		return nil, err
 	}
 
 	id, err := u.userRepository.Insert(user)
@@ -71,9 +81,11 @@ func (u *userServiceImpl) ValidateCredentials(email string, password string) (bo
 	user, err := u.userRepository.FindOne(userRepository.FindCondition{
 		Email: email,
 	})
-
 	if err != nil {
 		return false, processRepositoryError(err)
+	}
+	if user == nil {
+		return false, &UserNotFoundError{}
 	}
 
 	isValid := user.ValidatePassword(password)
@@ -87,24 +99,35 @@ func (u *userServiceImpl) ChangePassword(id uint, newPassword string) error {
 	if err != nil {
 		return processRepositoryError(err)
 	}
+	if user == nil {
+		return &UserNotFoundError{id: id}
+	}
 
-	err = user.SetPassword(newPassword)
+	err = user.CryptAndSetPassword(newPassword)
 	if err != nil {
 		return &UnexpectedServiceError{}
+	}
+
+	err = u.userRepository.Update(user)
+	if err != nil {
+		return processRepositoryError(err)
 	}
 
 	return nil
 }
 
 func (u *userServiceImpl) GetToken(userId uint) (string, error) {
-	_, err := u.userRepository.FindOne(userRepository.FindCondition{
+	user, err := u.userRepository.FindOne(userRepository.FindCondition{
 		ID: userId,
 	})
 	if err != nil {
 		return "", processRepositoryError(err)
 	}
+	if user == nil {
+		return "", &UserNotFoundError{id: userId}
+	}
 
-	token, err := u.tokenService.GenerateToken(userId, u.tokenTTL)
+	token, err := u.tokenProvider.GenerateToken(userId, u.tokenTTL)
 	if err != nil {
 		return "", &UnexpectedServiceError{}
 	}
@@ -112,13 +135,13 @@ func (u *userServiceImpl) GetToken(userId uint) (string, error) {
 	return token, nil
 }
 
-func (u *userServiceImpl) GetUserFromToken(token string) (userEntity.UserDTO, error) {
-	claims, err := u.tokenService.ValidateToken(token)
+func (u *userServiceImpl) GetUserByToken(token string) (userEntity.UserDTO, error) {
+	claims, err := u.tokenProvider.ValidateToken(token)
 	if err != nil {
 		return nil, processTokenError(err)
 	}
 
-	userID := claims.UserId
+	userID := claims.UserID
 	user, err := u.userRepository.FindOne(userRepository.FindCondition{
 		ID: userID,
 	})
@@ -129,28 +152,20 @@ func (u *userServiceImpl) GetUserFromToken(token string) (userEntity.UserDTO, er
 	return userEntity.NewUserDTOFromEntity(user), nil
 }
 
-func NewUserService(tokenService tokens.TokenProvider, userRepository userRepository.UserRepository, tokenTTL time.Duration) UserService {
-	return &userServiceImpl{
-		tokenService:   tokenService,
-		userRepository: userRepository,
-		tokenTTL:       tokenTTL,
-	}
-}
-
 func processRepositoryError(err error) error {
-	var cre *userRepository.CommonRepositoryError
-	if errors.As(err, &cre) {
-		return &StorageError{storageErrorText: cre.Error()}
+	switch t := err.(type) {
+	case *userRepository.InvalidIdError, *userRepository.CommonRepositoryError:
+		return &StorageError{storageErrorText: t.Error()}
+	default:
+		return &UnexpectedServiceError{}
 	}
-	return &UnexpectedServiceError{}
 }
 
 func processTokenError(err error) error {
-	_, isExpired := err.(*tokens.UnexpectedTokenError)
-	_, isNotToken := err.(*tokens.NotTokenError)
-
-	if isExpired || isNotToken {
-		return err
+	switch e := err.(type) {
+	case *tokens.UnexpectedTokenError, *tokens.NotTokenError:
+		return e
+	default:
+		return &UnexpectedServiceError{}
 	}
-	return &UnexpectedServiceError{}
 }

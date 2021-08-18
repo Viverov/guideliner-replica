@@ -1,4 +1,4 @@
-package token_provider
+package tokenprovider
 
 import (
 	"github.com/dgrijalva/jwt-go"
@@ -60,7 +60,7 @@ func (s *tokenProviderJWT) ValidateToken(encodedToken string) (*AuthClaims, erro
 
 	jwtClaims := token.Claims.(*authJwtClaim)
 	return &AuthClaims{
-		UserId:    jwtClaims.UserId,
+		UserID:    jwtClaims.UserId,
 		Audience:  jwtClaims.StandardClaims.Audience,
 		ExpiresAt: jwtClaims.StandardClaims.ExpiresAt,
 		Id:        jwtClaims.StandardClaims.Id,

@@ -11,12 +11,12 @@ func (e *InvalidFindConditionError) Error() string {
 }
 
 type CommonRepositoryError struct {
-	action    string
-	errorText string
+	Action    string
+	ErrorText string
 }
 
 func (c *CommonRepositoryError) Error() string {
-	return fmt.Sprintf("Error occured while %s: %s", c.action, c.errorText)
+	return fmt.Sprintf("Error occured while %s: %s", c.Action, c.ErrorText)
 }
 
 type UserAlreadyExistsError struct{}
@@ -31,7 +31,7 @@ func (u *UserNotFoundError) Error() string {
 	return "User not found"
 }
 
-type InvalidIdError struct {}
+type InvalidIdError struct{}
 
 func (i *InvalidIdError) Error() string {
 	return "Invalid ID"
