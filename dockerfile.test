@@ -3,7 +3,7 @@ FROM golang:1.16
 # Install dependencies
 RUN apt-get update
 RUN apt-get install -y postgresql-client
-RUN go install github.com/golang/mock/mockgen@v1.6.0
+RUN go get github.com/golang/mock/mockgen@v1.6.0
 
 # Set env
 ENV GUIDELINER_ENV=test
