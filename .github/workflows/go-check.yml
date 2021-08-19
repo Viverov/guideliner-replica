@@ -56,6 +56,8 @@ jobs:
         key: ${{ runner.os }}-buildx-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-buildx-
+    - name: Install gomock
+      run: go get github.com/golang/mock/mockgen@v1.6.0
     - name: Unit tests
       run: make tests-unit
     - name: Integration tests
