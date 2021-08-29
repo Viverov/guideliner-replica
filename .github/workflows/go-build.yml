@@ -33,11 +33,11 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
       - name: Build
-        run: GOOS=linux GOARCH=${{ matrix.linux_arch }} go build -o ./bin/guideliner_linux_${{ matrix.linux_arch }}_${{ steps.date.outputs.date }} ./cmd/guideliner/main.go
+        run: GOOS=linux GOARCH=${{ matrix.linux_arch }} go build -o ./bin/guideliner_${{ matrix.linux_arch }}_${{ steps.date.outputs.date }} ./cmd/guideliner/main.go
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: build-result
+          name: guideliner_${{ matrix.linux_arch }}_${{ steps.date.outputs.date }}
           path: |
             ./bin/
           retention-days: 30
