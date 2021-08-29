@@ -6,6 +6,7 @@ import (
 	"github.com/Viverov/guideliner/internal/config"
 	"github.com/Viverov/guideliner/internal/db"
 	"github.com/Viverov/guideliner/internal/domains/user/entity"
+	"github.com/Viverov/guideliner/internal/domains/util"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 	"testing"
@@ -277,7 +278,7 @@ func Test_userRepositoryPostgresql_Update(t *testing.T) {
 				email:    "new_email@test.com",
 				password: "new_password",
 			},
-			wantErr: &UserNotFoundError{},
+			wantErr: util.NewEntityNotFoundError("User", 15),
 		},
 	}
 	for _, tt := range tests {

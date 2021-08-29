@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	userEntity "github.com/Viverov/guideliner/internal/domains/user/entity"
+	"github.com/Viverov/guideliner/internal/domains/util"
 	"gorm.io/gorm"
 )
 
@@ -89,7 +90,7 @@ func (r *userRepositoryPostgresql) Update(u userEntity.User) error {
 		return err
 	}
 	if user == nil {
-		return &UserNotFoundError{}
+		return util.NewEntityNotFoundError("User", u.ID())
 	}
 
 	um := &userModel{

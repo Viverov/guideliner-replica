@@ -37,6 +37,8 @@ migrations-build: vendor
 clean-db-build: vendor
 	go build -o ./bin/clean_db -mod vendor  ./cmd/clean_postgresql/main.go
 
+all-build: vendor guideliner-build migrations-build clean-db-build
+
 create-migration:
 	touch ./internal/migrations/"$$(date +'%s_tempname.go')"
 
