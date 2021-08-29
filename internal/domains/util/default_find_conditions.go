@@ -1,12 +1,28 @@
 package util
 
+import (
+	"gorm.io/gorm"
+	"strings"
+)
+
 const DefaultLimit = 20
+
+type DirectionType string
+
+const (
+	ASC  DirectionType = "ASC"
+	DESC DirectionType = "DESC"
+)
+
+type Order struct {
+	Field     string
+	Direction DirectionType
+}
 
 type DefaultFindConditions struct {
 	Limit  int
 	Offset int
-	//Order in format "+atr1-atr2" (that means atr1 ASC atr2 DESC)
-	Order string
+	Order  []Order
 }
 
 func (fc DefaultFindConditions) ResolveLimit() int {
@@ -15,4 +31,28 @@ func (fc DefaultFindConditions) ResolveLimit() int {
 	}
 
 	return DefaultLimit
+}
+
+func (fc DefaultFindConditions) ParseOrderCondition() string {
+	if fc.Order == nil || len(fc.Order) == 0 {
+		return "id ASC"
+	}
+
+	var responseParts []string
+	for _, o := range fc.Order {
+		if o.Direction == ASC {
+			responseParts = append(responseParts, o.Field+" ASC")
+		} else {
+			responseParts = append(responseParts, o.Field+" DESC")
+		}
+	}
+
+	return strings.Join(responseParts, ",")
+}
+
+func SetDefaultConditions(db *gorm.DB, c DefaultFindConditions) *gorm.DB {
+	return db.
+		Order(c.ParseOrderCondition()).
+		Limit(c.ResolveLimit()).
+		Offset(c.Offset)
 }

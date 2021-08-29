@@ -3,7 +3,15 @@ package entity
 type guideDTOImpl struct {
 	id          uint
 	description string
-	nodesJson   string
+	nodesJSON   string
+}
+
+func NewGuideDTO(id uint, description string, nodesJSON string) *guideDTOImpl {
+	return &guideDTOImpl{
+		id:          id,
+		description: description,
+		nodesJSON:   nodesJSON,
+	}
 }
 
 func NewGuideDTOFromEntity(guide Guide) (*guideDTOImpl, error) {
@@ -14,7 +22,7 @@ func NewGuideDTOFromEntity(guide Guide) (*guideDTOImpl, error) {
 	return &guideDTOImpl{
 		id:          guide.ID(),
 		description: guide.Description(),
-		nodesJson:   nodesJson,
+		nodesJSON:   nodesJson,
 	}, nil
 }
 
@@ -27,5 +35,5 @@ func (g *guideDTOImpl) Description() string {
 }
 
 func (g *guideDTOImpl) NodesJson() string {
-	return g.nodesJson
+	return g.nodesJSON
 }

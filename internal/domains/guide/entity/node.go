@@ -5,8 +5,6 @@ import (
 )
 
 type node struct {
-	//ConditionType     condition.CondType `json:"condition_type,omitempty"`
-	//ConditionDuration time.Duration      `json:"condition_duration,omitempty"`
 	Condition *Condition `json:"condition,omitempty"`
 	Text      string     `json:"text,omitempty"`
 	NextNodes []*node    `json:"next_nodes,omitempty"`

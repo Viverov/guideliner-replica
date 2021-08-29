@@ -1,7 +1,10 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
 	"github.com/Viverov/guideliner/internal/domains/guide/entity"
+	"github.com/Viverov/guideliner/internal/domains/util"
 	"gorm.io/gorm"
 )
 
@@ -13,6 +16,10 @@ type guideModel struct {
 	gorm.Model
 	Description string `gorm:"not null"`
 	NodesJson   string `gorm:"not null"`
+}
+
+func (g guideModel) TableName() string {
+	return "guides"
 }
 
 func NewGuideRepositoryPsql(db *gorm.DB) *guideRepositoryPsql {
@@ -30,22 +37,27 @@ func (r *guideRepositoryPsql) FindById(id uint) (entity.Guide, error) {
 
 	result := r.db.First(gm)
 	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
 		return nil, &CommonRepositoryError{
 			action:    "FindById",
 			errorText: result.Error.Error(),
 		}
 	}
 
-	return entity.NewGuideWithParams(gm.ID, gm.NodesJson, gm.Description)
+	return entity.NewGuide(gm.ID, gm.NodesJson, gm.Description)
 }
 
 func (r *guideRepositoryPsql) Find(condition FindConditions) ([]entity.Guide, error) {
-	if condition.Search == "" {
-		return nil, &InvalidFindConditionError{}
+	tx := util.SetDefaultConditions(r.db, condition.DefaultFindConditions)
+	if condition.Search != "" {
+		tx = tx.Where("Description ILIKE ?", fmt.Sprint("%", condition.Search, "%"))
 	}
 
-	var gms []guideModel
-	result := r.db.Limit(condition.ResolveLimit()).Find(gms)
+	var gms []*guideModel
+	result := tx.Find(&gms)
 	if result.Error != nil {
 		return nil, &CommonRepositoryError{
 			action:    "Find",
@@ -55,7 +67,7 @@ func (r *guideRepositoryPsql) Find(condition FindConditions) ([]entity.Guide, er
 
 	var guides []entity.Guide
 	for _, gm := range gms {
-		g, err := entity.NewGuideWithParams(gm.ID, gm.NodesJson, gm.Description)
+		g, err := entity.NewGuide(gm.ID, gm.NodesJson, gm.Description)
 		if err != nil {
 			return nil, err
 		}
@@ -66,6 +78,9 @@ func (r *guideRepositoryPsql) Find(condition FindConditions) ([]entity.Guide, er
 }
 
 func (r *guideRepositoryPsql) Insert(guide entity.Guide) (id uint, err error) {
+	if guide == nil {
+		return 0, util.NewNilEntityError("Guide")
+	}
 	nodesJson, err := guide.NodesToJSON()
 	if err != nil {
 		return 0, err
@@ -87,6 +102,18 @@ func (r *guideRepositoryPsql) Insert(guide entity.Guide) (id uint, err error) {
 }
 
 func (r *guideRepositoryPsql) Update(guide entity.Guide) error {
+	if guide == nil {
+		return util.NewNilEntityError("Guide")
+	}
+
+	g, err := r.FindById(guide.ID())
+	if err != nil {
+		return err
+	}
+	if g == nil {
+		return util.NewEntityNotFoundError("Guide", guide.ID())
+	}
+
 	nodesJson, err := guide.NodesToJSON()
 	if err != nil {
 		return err

@@ -11,30 +11,6 @@ import (
 var oneMinuteDuration, _ = time.ParseDuration("1m")
 
 func TestNewGuide(t *testing.T) {
-	tests := []struct {
-		name string
-		want *guideImpl
-	}{
-		{
-			name: "Should return empty guide",
-			want: &guideImpl{
-				id:          0,
-				rootNode:    nil,
-				description: "",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := NewGuide()
-			assert.Equal(t, tt.want.id, got.id)
-			assert.Equal(t, tt.want.rootNode, got.rootNode)
-			assert.Equal(t, tt.want.description, got.description)
-		})
-	}
-}
-
-func TestNewGuideWithParams(t *testing.T) {
 	type args struct {
 		id          uint
 		nodesJson   string
@@ -73,16 +49,6 @@ func TestNewGuideWithParams(t *testing.T) {
 			},
 			want:    nil,
 			wantErr: &InvalidJsonError{},
-		},
-		{
-			name: "Should throw error on zero id",
-			args: args{
-				id:          0,
-				nodesJson:   "{}",
-				description: "test description",
-			},
-			want:    nil,
-			wantErr: &InvalidIdError{},
 		},
 		{
 			name: "Should parse nodes",
@@ -129,7 +95,7 @@ func TestNewGuideWithParams(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewGuideWithParams(tt.args.id, tt.args.nodesJson, tt.args.description)
+			got, err := NewGuide(tt.args.id, tt.args.nodesJson, tt.args.description)
 
 			if tt.wantErr == nil {
 				assert.Nil(t, err)
@@ -217,25 +183,25 @@ func Test_guideImpl_SetID(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		fields fields
+		fields  fields
 		args    args
 		wantId  uint
 		wantErr error
 	}{
 		{
-			name:    "Should set new ID",
+			name: "Should set new ID",
 			fields: fields{
 				id:          1,
 				description: "",
 				rootNode:    nil,
 			},
 			args:    args{id: 50},
-			wantId: 50,
+			wantId:  50,
 			wantErr: nil,
 		},
 		{
-			name:    "Should return InvalidIdError",
-			fields:  fields{
+			name: "Should return InvalidIdError",
+			fields: fields{
 				id:          1,
 				description: "",
 				rootNode:    nil,

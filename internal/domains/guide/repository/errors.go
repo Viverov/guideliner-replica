@@ -16,3 +16,9 @@ type InvalidFindConditionError struct{}
 func (e *InvalidFindConditionError) Error() string {
 	return "Error occurred while find guides: search must be defined"
 }
+
+type GuideNotFoundError struct{}
+
+func (e *GuideNotFoundError) Error() string {
+	return "Guide with provided ID not found"
+}

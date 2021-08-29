@@ -4,6 +4,8 @@ import (
 	"errors"
 	"github.com/Viverov/guideliner/internal/domains/guide/entity"
 	"github.com/Viverov/guideliner/internal/domains/guide/repository"
+	"github.com/Viverov/guideliner/internal/domains/user/service"
+	"github.com/Viverov/guideliner/internal/domains/util"
 )
 
 type guideServiceImpl struct {
@@ -50,10 +52,13 @@ func (s *guideServiceImpl) FindById(id uint) (entity.GuideDTO, error) {
 }
 
 func (s *guideServiceImpl) Create(description string, nodesJson string) (entity.GuideDTO, error) {
-	guide := entity.NewGuide()
+	guide, err := entity.NewGuide(0, "{}", "")
+	if err != nil {
+		return nil, &service.UnexpectedServiceError{}
+	}
 
 	guide.SetDescription(description)
-	err := guide.SetNodesFromJSON(nodesJson)
+	err = guide.SetNodesFromJSON(nodesJson)
 	if err != nil {
 		return nil, &InvalidNodesJsonError{}
 	}
@@ -92,6 +97,11 @@ func (s *guideServiceImpl) Update(id uint, params UpdateParams) error {
 		}
 	}
 
+	err = s.repository.Update(guide)
+	if err != nil {
+		return processRepositoryError(err)
+	}
+
 	return nil
 }
 
@@ -101,7 +111,7 @@ func (s *guideServiceImpl) findEntityById(id uint) (entity.Guide, error) {
 		return nil, processRepositoryError(err)
 	}
 	if guide == nil {
-		return nil, &GuideNotFoundError{id: id}
+		return nil, util.NewEntityNotFoundError("Guide", id)
 	}
 
 	return guide, err

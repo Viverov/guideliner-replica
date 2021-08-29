@@ -6,6 +6,7 @@ func GetMigrationsList() []*gormigrate.Migration {
 	var migrationsList []*gormigrate.Migration
 
 	migrationsList = append(migrationsList, createUserTable())
+	migrationsList = append(migrationsList, createGuidesTable())
 
 	return migrationsList
 }

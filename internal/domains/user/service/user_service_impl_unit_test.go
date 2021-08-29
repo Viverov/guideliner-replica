@@ -573,23 +573,22 @@ func Test_userServiceImpl_GetUserByToken(t *testing.T) {
 	}
 }
 
-
 func Test_userServiceImpl_ValidateCredentials(t *testing.T) {
 	type args struct {
 		email    string
 		password string
 	}
 	tests := []struct {
-		name    string
-		args    args
-		userInDB entity.User
+		name                    string
+		args                    args
+		userInDB                entity.User
 		errFromRepositoryOnFind error
-		want    bool
-		wantErr error
+		want                    bool
+		wantErr                 error
 	}{
 		{
-			name:                    "Should return 'true' on valid credentials",
-			args:                    args{
+			name: "Should return 'true' on valid credentials",
+			args: args{
 				email:    "some@email.com",
 				password: "123123",
 			},
@@ -599,19 +598,22 @@ func Test_userServiceImpl_ValidateCredentials(t *testing.T) {
 			wantErr:                 nil,
 		},
 		{
-			name:                    "Should return 'false' on invalid credentials",
-			args:                    args{
+			name: "Should return 'false' on invalid credentials",
+			args: args{
 				email:    "some@email.com",
 				password: "123123",
 			},
-			userInDB:                func() entity.User { u, _ := entity.NewUserWithRawPassword(10, "some@email.com", "invalid password"); return u }(),
+			userInDB: func() entity.User {
+				u, _ := entity.NewUserWithRawPassword(10, "some@email.com", "invalid password")
+				return u
+			}(),
 			errFromRepositoryOnFind: nil,
 			want:                    false,
 			wantErr:                 nil,
 		},
 		{
-			name:                    "Should return error on undefined email",
-			args:                    args{
+			name: "Should return error on undefined email",
+			args: args{
 				email:    "indefined@email.com",
 				password: "123123",
 			},
@@ -621,18 +623,18 @@ func Test_userServiceImpl_ValidateCredentials(t *testing.T) {
 			wantErr:                 &UserNotFoundError{},
 		},
 		{
-			name:                    "Should return error on error from repository",
-			args:                    args{
+			name: "Should return error on error from repository",
+			args: args{
 				email:    "some@email.com",
 				password: "123123",
 			},
-			userInDB:                nil,
+			userInDB: nil,
 			errFromRepositoryOnFind: &userRepository.CommonRepositoryError{
 				Action:    "find",
 				ErrorText: "test",
 			},
-			want:                    false,
-			wantErr:                 &StorageError{storageErrorText: (&userRepository.CommonRepositoryError{
+			want: false,
+			wantErr: &StorageError{storageErrorText: (&userRepository.CommonRepositoryError{
 				Action:    "find",
 				ErrorText: "test",
 			}).Error()},

@@ -34,10 +34,10 @@ func TestNewGuideDTOFromEntity(t *testing.T) {
 					},
 				},
 			}},
-			want:    &guideDTOImpl{
+			want: &guideDTOImpl{
 				id:          10,
 				description: "test",
-				nodesJson:   "{\"condition\":{\"type\":\"MANUAL\"},\"text\":\"node_1_text\",\"next_nodes\":[{\"condition\":{\"type\":\"TIME\",\"duration\":60000000000},\"text\":\"inner_node_1_text\"}]}",
+				nodesJSON:   "{\"condition\":{\"type\":\"MANUAL\"},\"text\":\"node_1_text\",\"next_nodes\":[{\"condition\":{\"type\":\"TIME\",\"duration\":60000000000},\"text\":\"inner_node_1_text\"}]}",
 			},
 			wantErr: nil,
 		},
@@ -46,17 +46,17 @@ func TestNewGuideDTOFromEntity(t *testing.T) {
 			args: args{&guideImpl{
 				id:          10,
 				description: "test",
-				rootNode: &node{},
+				rootNode:    &node{},
 			}},
-			want:    &guideDTOImpl{
+			want: &guideDTOImpl{
 				id:          10,
 				description: "test",
-				nodesJson:   "{}",
+				nodesJSON:   "{}",
 			},
 			wantErr: nil,
 		},
 	}
-		for _, tt := range tests {
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := NewGuideDTOFromEntity(tt.args.guide)
 			if tt.wantErr == nil {
@@ -83,13 +83,13 @@ func Test_guideDTOImpl_Description(t *testing.T) {
 		want   string
 	}{
 		{
-			name:   "Should return description",
+			name: "Should return description",
 			fields: fields{
 				id:          10,
 				description: "test",
 				nodesJson:   "{}",
 			},
-			want:   "test",
+			want: "test",
 		},
 	}
 	for _, tt := range tests {
@@ -97,7 +97,7 @@ func Test_guideDTOImpl_Description(t *testing.T) {
 			g := &guideDTOImpl{
 				id:          tt.fields.id,
 				description: tt.fields.description,
-				nodesJson:   tt.fields.nodesJson,
+				nodesJSON:   tt.fields.nodesJson,
 			}
 			assert.Equal(t, tt.want, g.Description())
 		})
@@ -116,13 +116,13 @@ func Test_guideDTOImpl_ID(t *testing.T) {
 		want   uint
 	}{
 		{
-			name:   "Should return ID",
+			name: "Should return ID",
 			fields: fields{
 				id:          10,
 				description: "test",
 				nodesJson:   "{}",
 			},
-			want:   10,
+			want: 10,
 		},
 	}
 	for _, tt := range tests {
@@ -130,7 +130,7 @@ func Test_guideDTOImpl_ID(t *testing.T) {
 			g := &guideDTOImpl{
 				id:          tt.fields.id,
 				description: tt.fields.description,
-				nodesJson:   tt.fields.nodesJson,
+				nodesJSON:   tt.fields.nodesJson,
 			}
 			assert.Equal(t, tt.want, g.ID())
 		})
@@ -149,13 +149,13 @@ func Test_guideDTOImpl_NodesJson(t *testing.T) {
 		want   string
 	}{
 		{
-			name:   "Should return nodes json",
+			name: "Should return nodes json",
 			fields: fields{
 				id:          10,
 				description: "",
 				nodesJson:   "{a:2, b:3}",
 			},
-			want:   "{a:2, b:3}",
+			want: "{a:2, b:3}",
 		},
 	}
 	for _, tt := range tests {
@@ -163,7 +163,7 @@ func Test_guideDTOImpl_NodesJson(t *testing.T) {
 			g := &guideDTOImpl{
 				id:          tt.fields.id,
 				description: tt.fields.description,
-				nodesJson:   tt.fields.nodesJson,
+				nodesJSON:   tt.fields.nodesJson,
 			}
 			assert.Equal(t, tt.want, g.NodesJson())
 		})
