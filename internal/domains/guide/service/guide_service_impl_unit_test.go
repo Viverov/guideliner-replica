@@ -14,17 +14,12 @@ import (
 )
 
 func TestNewGuideService(t *testing.T) {
-	type args struct {
-		rep repository.GuideRepository
-	}
 	tests := []struct {
 		name string
-		args args
 		want *guideServiceImpl
 	}{
 		{
 			name: "Should create new guide service",
-			args: args{},
 		},
 	}
 	for _, tt := range tests {
@@ -365,9 +360,9 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 				guide: nil,
 				err:   nil,
 			},
-			repUpdateExpected: false,
+			repUpdateExpected:  false,
 			resFromRepOnUpdate: resFromRepOnUpdate{},
-			wantErr: util.NewEntityNotFoundError("Guide", 10),
+			wantErr:            util.NewEntityNotFoundError("Guide", 10),
 		},
 		{
 			name: "Should return error on undefined user",
@@ -382,9 +377,9 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 				guide: nil,
 				err:   nil,
 			},
-			repUpdateExpected: false,
+			repUpdateExpected:  false,
 			resFromRepOnUpdate: resFromRepOnUpdate{},
-			wantErr: util.NewEntityNotFoundError("Guide", 10),
+			wantErr:            util.NewEntityNotFoundError("Guide", 10),
 		},
 		{
 			name: "Should return error on repository error",

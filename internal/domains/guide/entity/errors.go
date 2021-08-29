@@ -5,7 +5,7 @@ import "fmt"
 type RootNodeAlreadySetError struct{}
 
 func (e *RootNodeAlreadySetError) Error() string {
-	return fmt.Sprintf("root nodeImpl already set")
+	return "root nodeImpl already set"
 }
 
 type NodeNotFoundError struct {
@@ -20,7 +20,7 @@ type InvalidConditionTypeError struct {
 }
 
 func (i *InvalidConditionTypeError) Error() string {
-	return fmt.Sprintf("conditionType not found")
+	return "conditionType not found"
 }
 
 type UnexpectedGuideError struct {
@@ -34,11 +34,11 @@ func (u *UnexpectedGuideError) Error() string {
 type InvalidJsonError struct{}
 
 func (e *InvalidJsonError) Error() string {
-	return fmt.Sprintf("invalid json passed")
+	return "invalid json passed"
 }
 
 type InvalidIdError struct{}
 
 func (e *InvalidIdError) Error() string {
-	return fmt.Sprintf("id must be above zero")
+	return "id must be above zero"
 }

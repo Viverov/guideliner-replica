@@ -27,5 +27,5 @@ func (e *GuideNotFoundError) Error() string {
 type InvalidNodesJsonError struct{}
 
 func (e *InvalidNodesJsonError) Error() string {
-	return fmt.Sprintf("Can't parse json into correct nodes")
+	return "Can't parse json into correct nodes"
 }
