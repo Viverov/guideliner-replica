@@ -3,7 +3,7 @@ package repository
 import (
 	"errors"
 	userEntity "github.com/Viverov/guideliner/internal/domains/user/entity"
-	"github.com/Viverov/guideliner/internal/domains/util"
+	urepo "github.com/Viverov/guideliner/internal/domains/util/urepo"
 	"gorm.io/gorm"
 )
 
@@ -45,10 +45,7 @@ func (r *userRepositoryPostgresql) FindOne(condition FindCondition) (userEntity.
 			return nil, nil
 		}
 
-		return nil, &CommonRepositoryError{
-			Action:    "find",
-			ErrorText: result.Error.Error(),
-		}
+		return nil, urepo.NewUnexpectedRepositoryError("Find", result.Error.Error())
 	}
 
 	user, err := userEntity.NewUser(um.ID, um.Email, um.Password)
@@ -71,10 +68,7 @@ func (r *userRepositoryPostgresql) Insert(u userEntity.User) (id uint, err error
 	result := r.db.Create(um)
 
 	if result.Error != nil {
-		return 0, &CommonRepositoryError{
-			Action:    "create",
-			ErrorText: result.Error.Error(),
-		}
+		return 0, urepo.NewUnexpectedRepositoryError("Create", result.Error.Error())
 	}
 
 	return um.ID, nil
@@ -90,7 +84,7 @@ func (r *userRepositoryPostgresql) Update(u userEntity.User) error {
 		return err
 	}
 	if user == nil {
-		return util.NewEntityNotFoundError("User", u.ID())
+		return urepo.NewEntityNotFoundError("User", u.ID())
 	}
 
 	um := &userModel{
@@ -103,10 +97,7 @@ func (r *userRepositoryPostgresql) Update(u userEntity.User) error {
 
 	result := r.db.Save(um)
 	if result.Error != nil {
-		return &CommonRepositoryError{
-			Action:    "update",
-			ErrorText: result.Error.Error(),
-		}
+		return urepo.NewUnexpectedRepositoryError("Update", result.Error.Error())
 	}
 
 	return nil

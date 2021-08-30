@@ -9,6 +9,7 @@ import (
 	"github.com/Viverov/guideliner/internal/db"
 	"github.com/Viverov/guideliner/internal/domains/guide/entity"
 	"github.com/Viverov/guideliner/internal/domains/util"
+	"github.com/Viverov/guideliner/internal/domains/util/urepo"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 	"testing"
@@ -236,7 +237,7 @@ func Test_guideRepositoryPsql_Insert(t *testing.T) {
 			args: args{
 				guide: nil,
 			},
-			wantErr: util.NewNilEntityError("Guide"),
+			wantErr: urepo.NewNilEntityError("Guide"),
 		},
 	}
 	for _, tt := range tests {
@@ -302,7 +303,7 @@ func Test_guideRepositoryPsql_Update(t *testing.T) {
 				guide: func() entity.Guide { g, _ := entity.NewGuide(55, "{}", "nvm"); return g }(),
 			},
 			updatedTestDataID: 0,
-			wantErr:           util.NewEntityNotFoundError("Guide", 55),
+			wantErr:           urepo.NewEntityNotFoundError("Guide", 55),
 		},
 	}
 	for _, tt := range tests {

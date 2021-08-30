@@ -1,21 +1,8 @@
-package util
+package urepo
 
 import "fmt"
 
-type NilEntityError struct {
-	entityName string
-}
-
-func NewNilEntityError(entityName string) *NilEntityError {
-	return &NilEntityError{
-		entityName: entityName,
-	}
-}
-
-func (e *NilEntityError) Error() string {
-	return fmt.Sprintf("Entity %s can't be nil", e.entityName)
-}
-
+// EntityNotFoundError must be returned on actions (ex: findOne, update, patch, delete) with non-existent entities
 type EntityNotFoundError struct {
 	entityName string
 	id         uint
@@ -43,4 +30,12 @@ func (e *EntityNotFoundError) Error() string {
 
 	errorText += " not found"
 	return errorText
+}
+
+func (e *EntityNotFoundError) EntityName() string {
+	return e.entityName
+}
+
+func (e *EntityNotFoundError) Id() uint {
+	return e.id
 }
