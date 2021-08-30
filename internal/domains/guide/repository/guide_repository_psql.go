@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Viverov/guideliner/internal/domains/guide/entity"
 	"github.com/Viverov/guideliner/internal/domains/util"
+	"github.com/Viverov/guideliner/internal/domains/util/urepo"
 	"gorm.io/gorm"
 )
 
@@ -41,10 +42,7 @@ func (r *guideRepositoryPsql) FindById(id uint) (entity.Guide, error) {
 			return nil, nil
 		}
 
-		return nil, &CommonRepositoryError{
-			action:    "FindById",
-			errorText: result.Error.Error(),
-		}
+		return nil, urepo.NewUnexpectedRepositoryError("FindById", result.Error.Error())
 	}
 
 	return entity.NewGuide(gm.ID, gm.NodesJson, gm.Description)
@@ -59,10 +57,7 @@ func (r *guideRepositoryPsql) Find(condition FindConditions) ([]entity.Guide, er
 	var gms []*guideModel
 	result := tx.Find(&gms)
 	if result.Error != nil {
-		return nil, &CommonRepositoryError{
-			action:    "Find",
-			errorText: result.Error.Error(),
-		}
+		return nil, urepo.NewUnexpectedRepositoryError("Find", result.Error.Error())
 	}
 
 	var guides []entity.Guide
@@ -79,7 +74,7 @@ func (r *guideRepositoryPsql) Find(condition FindConditions) ([]entity.Guide, er
 
 func (r *guideRepositoryPsql) Insert(guide entity.Guide) (id uint, err error) {
 	if guide == nil {
-		return 0, util.NewNilEntityError("Guide")
+		return 0, urepo.NewNilEntityError("Guide")
 	}
 	nodesJson, err := guide.NodesToJSON()
 	if err != nil {
@@ -92,10 +87,7 @@ func (r *guideRepositoryPsql) Insert(guide entity.Guide) (id uint, err error) {
 	result := r.db.Create(gm)
 
 	if result.Error != nil {
-		return 0, &CommonRepositoryError{
-			action:    "insert",
-			errorText: result.Error.Error(),
-		}
+		return 0, urepo.NewUnexpectedRepositoryError("insert", result.Error.Error())
 	}
 
 	return gm.ID, nil
@@ -103,7 +95,7 @@ func (r *guideRepositoryPsql) Insert(guide entity.Guide) (id uint, err error) {
 
 func (r *guideRepositoryPsql) Update(guide entity.Guide) error {
 	if guide == nil {
-		return util.NewNilEntityError("Guide")
+		return urepo.NewNilEntityError("Guide")
 	}
 
 	g, err := r.FindById(guide.ID())
@@ -111,7 +103,7 @@ func (r *guideRepositoryPsql) Update(guide entity.Guide) error {
 		return err
 	}
 	if g == nil {
-		return util.NewEntityNotFoundError("Guide", guide.ID())
+		return urepo.NewEntityNotFoundError("Guide", guide.ID())
 	}
 
 	nodesJson, err := guide.NodesToJSON()
@@ -128,10 +120,7 @@ func (r *guideRepositoryPsql) Update(guide entity.Guide) error {
 
 	result := r.db.Save(gm)
 	if result.Error != nil {
-		return &CommonRepositoryError{
-			action:    "update",
-			errorText: result.Error.Error(),
-		}
+		return urepo.NewUnexpectedRepositoryError("update", result.Error.Error())
 	}
 
 	return nil

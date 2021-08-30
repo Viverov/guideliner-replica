@@ -4,6 +4,7 @@ import (
 	userEntity "github.com/Viverov/guideliner/internal/domains/user/entity"
 	userRepository "github.com/Viverov/guideliner/internal/domains/user/repository"
 	tokens "github.com/Viverov/guideliner/internal/domains/user/token_provider"
+	"github.com/Viverov/guideliner/internal/domains/util/uservice"
 	"strings"
 	"time"
 )
@@ -57,12 +58,12 @@ func (u *userServiceImpl) Register(email string, password string) (userEntity.Us
 	}
 
 	if alreadyExistUser != nil {
-		return nil, &EmailAlreadyExistError{}
+		return nil, NewEmailAlreadyExistError()
 	}
 
 	user, err := userEntity.NewUserWithRawPassword(0, email, password)
 	if err != nil {
-		return nil, &UnexpectedServiceError{}
+		return nil, uservice.NewUnexpectedServiceError()
 	}
 
 	id, err := u.userRepository.Insert(user)
@@ -85,7 +86,7 @@ func (u *userServiceImpl) ValidateCredentials(email string, password string) (bo
 		return false, processRepositoryError(err)
 	}
 	if user == nil {
-		return false, &UserNotFoundError{}
+		return false, uservice.NewNotFoundError("User", 0)
 	}
 
 	isValid := user.ValidatePassword(password)
@@ -100,12 +101,12 @@ func (u *userServiceImpl) ChangePassword(id uint, newPassword string) error {
 		return processRepositoryError(err)
 	}
 	if user == nil {
-		return &UserNotFoundError{id: id}
+		return uservice.NewNotFoundError("User", id)
 	}
 
 	err = user.CryptAndSetPassword(newPassword)
 	if err != nil {
-		return &UnexpectedServiceError{}
+		return uservice.NewUnexpectedServiceError()
 	}
 
 	err = u.userRepository.Update(user)
@@ -124,12 +125,12 @@ func (u *userServiceImpl) GetToken(userId uint) (string, error) {
 		return "", processRepositoryError(err)
 	}
 	if user == nil {
-		return "", &UserNotFoundError{id: userId}
+		return "", uservice.NewNotFoundError("User", userId)
 	}
 
 	token, err := u.tokenProvider.GenerateToken(userId, u.tokenTTL)
 	if err != nil {
-		return "", &UnexpectedServiceError{}
+		return "", uservice.NewUnexpectedServiceError()
 	}
 
 	return token, nil
@@ -154,10 +155,10 @@ func (u *userServiceImpl) GetUserByToken(token string) (userEntity.UserDTO, erro
 
 func processRepositoryError(err error) error {
 	switch t := err.(type) {
-	case *userRepository.InvalidIdError, *userRepository.CommonRepositoryError:
-		return &StorageError{storageErrorText: t.Error()}
+	case *userRepository.InvalidIdError:
+		return uservice.NewStorageError(t.Error())
 	default:
-		return &UnexpectedServiceError{}
+		return uservice.CheckDefaultRepoErrors(err)
 	}
 }
 
@@ -166,6 +167,6 @@ func processTokenError(err error) error {
 	case *tokens.UnexpectedTokenError, *tokens.NotTokenError:
 		return e
 	default:
-		return &UnexpectedServiceError{}
+		return uservice.NewUnexpectedServiceError()
 	}
 }

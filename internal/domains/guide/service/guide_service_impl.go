@@ -1,11 +1,10 @@
 package service
 
 import (
-	"errors"
 	"github.com/Viverov/guideliner/internal/domains/guide/entity"
 	"github.com/Viverov/guideliner/internal/domains/guide/repository"
-	"github.com/Viverov/guideliner/internal/domains/user/service"
-	"github.com/Viverov/guideliner/internal/domains/util"
+	"github.com/Viverov/guideliner/internal/domains/util/urepo"
+	"github.com/Viverov/guideliner/internal/domains/util/uservice"
 )
 
 type guideServiceImpl struct {
@@ -29,7 +28,7 @@ func (s *guideServiceImpl) Find(cond FindConditions) ([]entity.GuideDTO, error) 
 	for _, guide := range guides {
 		dto, err := entity.NewGuideDTOFromEntity(guide)
 		if err != nil {
-			return nil, &UnexpectedServiceError{}
+			return nil, uservice.NewUnexpectedServiceError()
 		}
 		dtos = append(dtos, dto)
 	}
@@ -45,7 +44,7 @@ func (s *guideServiceImpl) FindById(id uint) (entity.GuideDTO, error) {
 
 	dto, err := entity.NewGuideDTOFromEntity(guide)
 	if err != nil {
-		return nil, &UnexpectedServiceError{}
+		return nil, uservice.NewUnexpectedServiceError()
 	}
 
 	return dto, nil
@@ -54,13 +53,13 @@ func (s *guideServiceImpl) FindById(id uint) (entity.GuideDTO, error) {
 func (s *guideServiceImpl) Create(description string, nodesJson string) (entity.GuideDTO, error) {
 	guide, err := entity.NewGuide(0, "{}", "")
 	if err != nil {
-		return nil, &service.UnexpectedServiceError{}
+		return nil, uservice.NewUnexpectedServiceError()
 	}
 
 	guide.SetDescription(description)
 	err = guide.SetNodesFromJSON(nodesJson)
 	if err != nil {
-		return nil, &InvalidNodesJsonError{}
+		return nil, NewInvalidNodesJsonError()
 	}
 
 	id, err := s.repository.Insert(guide)
@@ -93,7 +92,7 @@ func (s *guideServiceImpl) Update(id uint, params UpdateParams) error {
 	if params.NodesJson != "" {
 		err := guide.SetNodesFromJSON(params.NodesJson)
 		if err != nil {
-			return &InvalidNodesJsonError{}
+			return NewInvalidNodesJsonError()
 		}
 	}
 
@@ -111,16 +110,12 @@ func (s *guideServiceImpl) findEntityById(id uint) (entity.Guide, error) {
 		return nil, processRepositoryError(err)
 	}
 	if guide == nil {
-		return nil, util.NewEntityNotFoundError("Guide", id)
+		return nil, urepo.NewEntityNotFoundError("Guide", id)
 	}
 
 	return guide, err
 }
 
 func processRepositoryError(err error) error {
-	var cre *repository.CommonRepositoryError
-	if errors.As(err, &cre) {
-		return &StorageError{storageErrorText: cre.Error()}
-	}
-	return &UnexpectedServiceError{}
+	return uservice.CheckDefaultRepoErrors(err)
 }

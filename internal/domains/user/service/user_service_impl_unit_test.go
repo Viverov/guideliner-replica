@@ -7,6 +7,8 @@ import (
 	userRepository "github.com/Viverov/guideliner/internal/domains/user/repository"
 	"github.com/Viverov/guideliner/internal/domains/user/service/mocks"
 	tokenprovider "github.com/Viverov/guideliner/internal/domains/user/token_provider"
+	"github.com/Viverov/guideliner/internal/domains/util/urepo"
+	"github.com/Viverov/guideliner/internal/domains/util/uservice"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"strings"
@@ -63,17 +65,17 @@ func Test_userServiceImpl_FindById(t *testing.T) {
 			name:               "Should return storage error for invalid ID error",
 			args:               args{0},
 			userFromRepository: nil,
-			errFromRepository:  &userRepository.InvalidIdError{},
+			errFromRepository:  userRepository.NewInvalidIdError(),
 			want:               nil,
-			wantErr:            &StorageError{storageErrorText: (&userRepository.InvalidIdError{}).Error()},
+			wantErr:            uservice.NewStorageError((userRepository.NewInvalidIdError()).Error()),
 		},
 		{
 			name:               "Should return storage error for common repository error",
 			args:               args{0},
 			userFromRepository: nil,
-			errFromRepository:  &userRepository.CommonRepositoryError{Action: "test", ErrorText: "errT"},
+			errFromRepository:  urepo.NewUnexpectedRepositoryError("test", "errT"),
 			want:               nil,
-			wantErr:            &StorageError{storageErrorText: (&userRepository.CommonRepositoryError{Action: "test", ErrorText: "errT"}).Error()},
+			wantErr:            uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("test", "errT").Error()),
 		},
 		{
 			name:               "Should return user's DTO",
@@ -132,9 +134,9 @@ func Test_userServiceImpl_FindByEmail(t *testing.T) {
 			name:               "Should return storage error for common repository error",
 			args:               args{"some@email.com"},
 			userFromRepository: nil,
-			errFromRepository:  &userRepository.CommonRepositoryError{Action: "test", ErrorText: "errT"},
+			errFromRepository:  urepo.NewUnexpectedRepositoryError("test", "errT"),
 			want:               nil,
-			wantErr:            &StorageError{storageErrorText: (&userRepository.CommonRepositoryError{Action: "test", ErrorText: "errT"}).Error()},
+			wantErr:            uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("test", "errT").Error()),
 		},
 		{
 			name:               "Should lowercase email",
@@ -207,22 +209,16 @@ func Test_userServiceImpl_Register(t *testing.T) {
 			errFromRepositoryOnFind: nil,
 			idFromInsert:            0,
 			want:                    nil,
-			wantErr:                 &EmailAlreadyExistError{},
+			wantErr:                 NewEmailAlreadyExistError(),
 		},
 		{
-			name:              "Should return error on repository error",
-			args:              args{email: "someemail@email.com", password: "abcdefasdasdasd"},
-			alreadyExistsUser: nil,
-			errFromRepositoryOnFind: &userRepository.CommonRepositoryError{
-				Action:    "find",
-				ErrorText: "test",
-			},
-			idFromInsert: 0,
-			want:         nil,
-			wantErr: &StorageError{storageErrorText: (&userRepository.CommonRepositoryError{
-				Action:    "find",
-				ErrorText: "test",
-			}).Error()},
+			name:                    "Should return error on repository error",
+			args:                    args{email: "someemail@email.com", password: "abcdefasdasdasd"},
+			alreadyExistsUser:       nil,
+			errFromRepositoryOnFind: urepo.NewUnexpectedRepositoryError("find", "test"),
+			idFromInsert:            0,
+			want:                    nil,
+			wantErr:                 uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("find", "test").Error()),
 		},
 	}
 	for _, tt := range tests {
@@ -290,7 +286,7 @@ func Test_userServiceImpl_ChangePassword(t *testing.T) {
 			alreadyExistsUser:         nil,
 			errFromRepositoryOnFind:   nil,
 			errFromRepositoryOnUpdate: nil,
-			wantErr:                   &UserNotFoundError{id: 10},
+			wantErr:                   uservice.NewNotFoundError("User", 10),
 		},
 		{
 			name: "Should return error on find in db related error",
@@ -298,16 +294,10 @@ func Test_userServiceImpl_ChangePassword(t *testing.T) {
 				id:          10,
 				newPassword: "abcdef",
 			},
-			alreadyExistsUser: nil,
-			errFromRepositoryOnFind: &userRepository.CommonRepositoryError{
-				Action:    "find",
-				ErrorText: "test",
-			},
+			alreadyExistsUser:         nil,
+			errFromRepositoryOnFind:   urepo.NewUnexpectedRepositoryError("find", "test"),
 			errFromRepositoryOnUpdate: nil,
-			wantErr: &StorageError{storageErrorText: (&userRepository.CommonRepositoryError{
-				Action:    "find",
-				ErrorText: "test",
-			}).Error()},
+			wantErr:                   uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("find", "test").Error()),
 		},
 		{
 			name: "Should return error on update in db related error",
@@ -315,16 +305,10 @@ func Test_userServiceImpl_ChangePassword(t *testing.T) {
 				id:          10,
 				newPassword: "abcdef",
 			},
-			alreadyExistsUser:       func() entity.User { u, _ := entity.NewUserWithRawPassword(10, "some@email.com", "qwerty"); return u }(),
-			errFromRepositoryOnFind: nil,
-			errFromRepositoryOnUpdate: &userRepository.CommonRepositoryError{
-				Action:    "update",
-				ErrorText: "test",
-			},
-			wantErr: &StorageError{storageErrorText: (&userRepository.CommonRepositoryError{
-				Action:    "update",
-				ErrorText: "test",
-			}).Error()},
+			alreadyExistsUser:         func() entity.User { u, _ := entity.NewUserWithRawPassword(10, "some@email.com", "qwerty"); return u }(),
+			errFromRepositoryOnFind:   nil,
+			errFromRepositoryOnUpdate: urepo.NewUnexpectedRepositoryError("update", "test"),
+			wantErr:                   uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("update", "test").Error()),
 		},
 	}
 	for _, tt := range tests {
@@ -412,25 +396,19 @@ func Test_userServiceImpl_GetToken(t *testing.T) {
 			tokenFromProvider:       "abcdef",
 			errFromTokenProvider:    nil,
 			want:                    "",
-			wantErr:                 &UserNotFoundError{id: 10},
+			wantErr:                 uservice.NewNotFoundError("User", 10),
 		},
 		{
 			name: "Should return error on find in db related error",
 			args: args{
 				userId: 10,
 			},
-			alreadyExistsUser: nil,
-			errFromRepositoryOnFind: &userRepository.CommonRepositoryError{
-				Action:    "find",
-				ErrorText: "test",
-			},
-			tokenFromProvider:    "abcdef",
-			errFromTokenProvider: nil,
-			want:                 "",
-			wantErr: &StorageError{storageErrorText: (&userRepository.CommonRepositoryError{
-				Action:    "find",
-				ErrorText: "test",
-			}).Error()},
+			alreadyExistsUser:       nil,
+			errFromRepositoryOnFind: urepo.NewUnexpectedRepositoryError("find", "test"),
+			tokenFromProvider:       "abcdef",
+			errFromTokenProvider:    nil,
+			want:                    "",
+			wantErr:                 uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("find", "test").Error()),
 		},
 		{
 			name: "Should return error on token provider error",
@@ -442,7 +420,7 @@ func Test_userServiceImpl_GetToken(t *testing.T) {
 			tokenFromProvider:       "abcdef",
 			errFromTokenProvider:    &tokenprovider.UnexpectedGenerateError{},
 			want:                    "",
-			wantErr:                 &UnexpectedServiceError{},
+			wantErr:                 uservice.NewUnexpectedServiceError(),
 		},
 	}
 	for _, tt := range tests {
@@ -519,20 +497,14 @@ func Test_userServiceImpl_GetUserByToken(t *testing.T) {
 			wantErr:                 &tokenprovider.NotTokenError{},
 		},
 		{
-			name:                 "Should return error on error from repository",
-			args:                 args{token: "abcd"},
-			claims:               &tokenprovider.AuthClaims{UserID: 10},
-			errFromTokenProvider: nil,
-			userFromDB:           nil,
-			errFromRepositoryOnFind: &userRepository.CommonRepositoryError{
-				Action:    "find",
-				ErrorText: "test",
-			},
-			want: nil,
-			wantErr: &StorageError{storageErrorText: (&userRepository.CommonRepositoryError{
-				Action:    "find",
-				ErrorText: "test",
-			}).Error()},
+			name:                    "Should return error on error from repository",
+			args:                    args{token: "abcd"},
+			claims:                  &tokenprovider.AuthClaims{UserID: 10},
+			errFromTokenProvider:    nil,
+			userFromDB:              nil,
+			errFromRepositoryOnFind: urepo.NewUnexpectedRepositoryError("find", "test"),
+			want:                    nil,
+			wantErr:                 uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("find", "test").Error()),
 		},
 	}
 	for _, tt := range tests {
@@ -620,7 +592,7 @@ func Test_userServiceImpl_ValidateCredentials(t *testing.T) {
 			userInDB:                nil,
 			errFromRepositoryOnFind: nil,
 			want:                    false,
-			wantErr:                 &UserNotFoundError{},
+			wantErr:                 uservice.NewNotFoundError("User", 0),
 		},
 		{
 			name: "Should return error on error from repository",
@@ -628,16 +600,10 @@ func Test_userServiceImpl_ValidateCredentials(t *testing.T) {
 				email:    "some@email.com",
 				password: "123123",
 			},
-			userInDB: nil,
-			errFromRepositoryOnFind: &userRepository.CommonRepositoryError{
-				Action:    "find",
-				ErrorText: "test",
-			},
-			want: false,
-			wantErr: &StorageError{storageErrorText: (&userRepository.CommonRepositoryError{
-				Action:    "find",
-				ErrorText: "test",
-			}).Error()},
+			userInDB:                nil,
+			errFromRepositoryOnFind: urepo.NewUnexpectedRepositoryError("find", "test"),
+			want:                    false,
+			wantErr:                 uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("find", "test").Error()),
 		},
 	}
 	for _, tt := range tests {

@@ -7,6 +7,8 @@ import (
 	"github.com/Viverov/guideliner/internal/domains/guide/repository"
 	"github.com/Viverov/guideliner/internal/domains/guide/service/mocks"
 	"github.com/Viverov/guideliner/internal/domains/util"
+	"github.com/Viverov/guideliner/internal/domains/util/urepo"
+	"github.com/Viverov/guideliner/internal/domains/util/uservice"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"strconv"
@@ -67,8 +69,8 @@ func Test_guideServiceImpl_Create(t *testing.T) {
 				nodesJson:   "{}",
 			},
 			want:        nil,
-			wantErr:     &StorageError{storageErrorText: (&repository.CommonRepositoryError{}).Error()},
-			resFromRepo: resFromRepo{id: 10, err: &repository.CommonRepositoryError{}},
+			wantErr:     uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("test", "text").Error()),
+			resFromRepo: resFromRepo{id: 10, err: urepo.NewUnexpectedRepositoryError("test", "text")},
 		},
 	}
 	for _, tt := range tests {
@@ -177,10 +179,10 @@ func Test_guideServiceImpl_Find(t *testing.T) {
 			},
 			resFromRep: resFromRep{
 				guides: nil,
-				err:    &repository.CommonRepositoryError{},
+				err:    urepo.NewUnexpectedRepositoryError("test", "text"),
 			},
 			want:    nil,
-			wantErr: &StorageError{storageErrorText: (&repository.CommonRepositoryError{}).Error()},
+			wantErr: uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("test", "text").Error()),
 		},
 	}
 	for _, tt := range tests {
@@ -258,20 +260,18 @@ func Test_guideServiceImpl_FindById(t *testing.T) {
 				err:    nil,
 			},
 			want:    nil,
-			wantErr: util.NewEntityNotFoundError("Guide", 10),
+			wantErr: uservice.NewNotFoundError("Guide", 10),
 		},
 		{
 			name: "Should return error on repository error",
 			args: args{
 				id: 10,
 			},
-			want: nil,
-			wantErr: &StorageError{
-				storageErrorText: (&repository.CommonRepositoryError{}).Error(),
-			},
+			want:    nil,
+			wantErr: uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("text", "text").Error()),
 			resFromRep: resFromRep{
 				entity: nil,
-				err:    &repository.CommonRepositoryError{},
+				err:    urepo.NewUnexpectedRepositoryError("text", "text"),
 			},
 		},
 	}
@@ -362,24 +362,7 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 			},
 			repUpdateExpected:  false,
 			resFromRepOnUpdate: resFromRepOnUpdate{},
-			wantErr:            util.NewEntityNotFoundError("Guide", 10),
-		},
-		{
-			name: "Should return error on undefined user",
-			args: args{
-				id: 10,
-				params: UpdateParams{
-					Description: "newDesc",
-					NodesJson:   "{}",
-				},
-			},
-			resFromRepOnFind: resFromRepOnFind{
-				guide: nil,
-				err:   nil,
-			},
-			repUpdateExpected:  false,
-			resFromRepOnUpdate: resFromRepOnUpdate{},
-			wantErr:            util.NewEntityNotFoundError("Guide", 10),
+			wantErr:            uservice.NewNotFoundError("Guide", 10),
 		},
 		{
 			name: "Should return error on repository error",
@@ -396,9 +379,9 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 			},
 			repUpdateExpected: true,
 			resFromRepOnUpdate: resFromRepOnUpdate{
-				err: &repository.CommonRepositoryError{},
+				err: urepo.NewUnexpectedRepositoryError("test", "text"),
 			},
-			wantErr: &StorageError{storageErrorText: (&repository.CommonRepositoryError{}).Error()},
+			wantErr: uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("test", "text").Error()),
 		},
 	}
 	for _, tt := range tests {

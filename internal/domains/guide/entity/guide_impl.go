@@ -32,7 +32,7 @@ func (g *guideImpl) ID() uint {
 
 func (g *guideImpl) SetID(id uint) error {
 	if id == 0 {
-		return &InvalidIdError{}
+		return NewInvalidIdError()
 	}
 	g.id = id
 	return nil
@@ -49,7 +49,7 @@ func (g *guideImpl) SetDescription(description string) {
 func (g *guideImpl) NodesToJSON() (string, error) {
 	b, err := json.Marshal(g.rootNode)
 	if err != nil {
-		return "", &UnexpectedGuideError{info: fmt.Sprintf("Can't marshal guide into json with error: %s", err.Error())}
+		return "", NewUnexpectedGuideError(fmt.Sprintf("Can't marshal guide into json with error: %s", err.Error()))
 	}
 
 	return string(b), nil
@@ -59,7 +59,7 @@ func (g *guideImpl) SetNodesFromJSON(nodesJson string) error {
 	rootNode := &node{}
 	err := json.Unmarshal([]byte(nodesJson), rootNode)
 	if err != nil {
-		return &InvalidJsonError{}
+		return NewInvalidJsonError()
 	}
 	g.rootNode = rootNode
 

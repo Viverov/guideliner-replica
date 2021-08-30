@@ -6,7 +6,7 @@ import (
 	"github.com/Viverov/guideliner/internal/config"
 	"github.com/Viverov/guideliner/internal/db"
 	"github.com/Viverov/guideliner/internal/domains/user/entity"
-	"github.com/Viverov/guideliner/internal/domains/util"
+	"github.com/Viverov/guideliner/internal/domains/util/urepo"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 	"testing"
@@ -127,7 +127,7 @@ func Test_userRepositoryPostgresql_FindOne(t *testing.T) {
 			args:         args{condition: FindCondition{}},
 			wantUser:     false,
 			wantUserData: userData{},
-			wantErr:      &InvalidFindConditionError{},
+			wantErr:      NewInvalidFindConditionError(),
 		},
 	}
 
@@ -195,7 +195,7 @@ func Test_userRepositoryPostgresql_Insert(t *testing.T) {
 			name:    "Should return error for already exists user",
 			args:    args{u: alreadyExistsUser},
 			wantId:  false,
-			wantErr: &UserAlreadyExistsError{},
+			wantErr: NewUserAlreadyExistsError(),
 		},
 	}
 	for _, tt := range tests {
@@ -264,7 +264,7 @@ func Test_userRepositoryPostgresql_Update(t *testing.T) {
 				email:    "new_email@test.com",
 				password: "new_password",
 			},
-			wantErr: &InvalidIdError{},
+			wantErr: NewInvalidIdError(),
 		},
 		{
 			name: "Should return error for unexisting user",
@@ -278,7 +278,7 @@ func Test_userRepositoryPostgresql_Update(t *testing.T) {
 				email:    "new_email@test.com",
 				password: "new_password",
 			},
-			wantErr: util.NewEntityNotFoundError("User", 15),
+			wantErr: urepo.NewEntityNotFoundError("User", 15),
 		},
 	}
 	for _, tt := range tests {

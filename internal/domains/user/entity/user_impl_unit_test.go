@@ -38,13 +38,13 @@ func TestNewUser(t *testing.T) {
 			name:    "Empty email",
 			args:    args{id: 0, email: "", password: "1234567890"},
 			want:    nil,
-			wantErr: &EmptyArgError{argName: argNameEmail},
+			wantErr: NewEmptyArgError(argNameEmail),
 		},
 		{
 			name:    "Empty Password",
 			args:    args{id: 0, email: "Email", password: ""},
 			want:    nil,
-			wantErr: &EmptyArgError{argName: argNamePassword},
+			wantErr: NewEmptyArgError(argNamePassword),
 		},
 	}
 	for _, tt := range tests {
@@ -197,7 +197,7 @@ func Test_userImpl_SetID(t *testing.T) {
 			},
 			args:    args{id: 0},
 			wantID:  50,
-			wantErr: &InvalidIdError{},
+			wantErr: NewInvalidIdError(),
 		},
 	}
 	for _, tt := range tests {
@@ -261,7 +261,7 @@ func Test_userImpl_SetEmail(t *testing.T) {
 				password: "123123",
 			},
 			args:    args{email: ""},
-			wantErr: &EmptyArgError{argName: argNameEmail},
+			wantErr: NewEmptyArgError(argNameEmail),
 		},
 	}
 	for _, tt := range tests {
@@ -319,7 +319,7 @@ func Test_userImpl_CryptAndSetPassword(t *testing.T) {
 			args: args{
 				password: "",
 			},
-			wantErr: &EmptyArgError{argName: argNamePassword},
+			wantErr: NewEmptyArgError(argNamePassword),
 		},
 	}
 	for _, tt := range tests {
