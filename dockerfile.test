@@ -11,4 +11,4 @@ ENV GUIDELINER_ENV=test
 # Set workdir
 WORKDIR /app
 
-CMD ./cmd/sh/run_integration_tests.sh
+CMD ./cmd/sh/execute_integration_tests.sh

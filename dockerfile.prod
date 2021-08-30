@@ -9,7 +9,7 @@ WORKDIR /app
 
 COPY ./ /app/
 
-RUN make guideliner-build
-RUN make migrations-build
+RUN make build-guideliner
+RUN make build-migrations
 
 CMD ./cmd/sh/run_app.sh
