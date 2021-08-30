@@ -15,10 +15,10 @@ type userImpl struct {
 // NewUser is user constructor. Use ID == 0 for new user, not saved in DB.
 func NewUser(id uint, email string, hashedPassword string) (*userImpl, error) {
 	if len(email) == 0 {
-		return nil, &EmptyArgError{argName: argNameEmail}
+		return nil, NewEmptyArgError(argNameEmail)
 	}
 	if len(hashedPassword) == 0 {
-		return nil, &EmptyArgError{argName: argNamePassword}
+		return nil, NewEmptyArgError(argNamePassword)
 	}
 	return &userImpl{id, strings.ToLower(email), hashedPassword}, nil
 }
@@ -40,7 +40,7 @@ func NewUserWithRawPassword(id uint, email string, rawPassword string) (*userImp
 
 func (u *userImpl) SetID(id uint) error {
 	if id == 0 {
-		return &InvalidIdError{}
+		return NewInvalidIdError()
 	}
 	u.id = id
 
@@ -64,7 +64,7 @@ func (u *userImpl) ValidatePassword(password string) (isValid bool) {
 
 func (u *userImpl) SetEmail(email string) error {
 	if len(email) == 0 {
-		return &EmptyArgError{argName: argNameEmail}
+		return NewEmptyArgError(argNameEmail)
 	}
 	u.email = strings.ToLower(email)
 	return nil
@@ -84,7 +84,7 @@ func (u *userImpl) Email() string {
 
 func cryptPassword(password string) (string, error) {
 	if len(password) == 0 {
-		return "", &EmptyArgError{argName: argNamePassword}
+		return "", NewEmptyArgError(argNamePassword)
 	}
 
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)

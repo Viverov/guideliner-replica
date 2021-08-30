@@ -127,7 +127,7 @@ func Test_userRepositoryPostgresql_FindOne(t *testing.T) {
 			args:         args{condition: FindCondition{}},
 			wantUser:     false,
 			wantUserData: userData{},
-			wantErr:      &InvalidFindConditionError{},
+			wantErr:      NewInvalidFindConditionError(),
 		},
 	}
 
@@ -195,7 +195,7 @@ func Test_userRepositoryPostgresql_Insert(t *testing.T) {
 			name:    "Should return error for already exists user",
 			args:    args{u: alreadyExistsUser},
 			wantId:  false,
-			wantErr: &UserAlreadyExistsError{},
+			wantErr: NewUserAlreadyExistsError(),
 		},
 	}
 	for _, tt := range tests {
@@ -264,7 +264,7 @@ func Test_userRepositoryPostgresql_Update(t *testing.T) {
 				email:    "new_email@test.com",
 				password: "new_password",
 			},
-			wantErr: &InvalidIdError{},
+			wantErr: NewInvalidIdError(),
 		},
 		{
 			name: "Should return error for unexisting user",

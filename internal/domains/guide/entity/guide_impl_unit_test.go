@@ -48,7 +48,7 @@ func TestNewGuide(t *testing.T) {
 				description: "test description",
 			},
 			want:    nil,
-			wantErr: &InvalidJsonError{},
+			wantErr: NewInvalidJsonError(),
 		},
 		{
 			name: "Should parse nodes",
@@ -208,7 +208,7 @@ func Test_guideImpl_SetID(t *testing.T) {
 			},
 			args:    args{0},
 			wantId:  1,
-			wantErr: &InvalidIdError{},
+			wantErr: NewInvalidIdError(),
 		},
 	}
 	for _, tt := range tests {
@@ -347,7 +347,7 @@ func Test_guideImpl_SetNodesFromJSON(t *testing.T) {
 			name:         "Should return error for invalid JSON",
 			args:         args{nodesJson: "abcdv"},
 			wantRootNode: nil,
-			wantErr:      &InvalidJsonError{},
+			wantErr:      NewInvalidJsonError(),
 		},
 	}
 	for _, tt := range tests {

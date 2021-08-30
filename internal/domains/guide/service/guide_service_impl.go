@@ -59,7 +59,7 @@ func (s *guideServiceImpl) Create(description string, nodesJson string) (entity.
 	guide.SetDescription(description)
 	err = guide.SetNodesFromJSON(nodesJson)
 	if err != nil {
-		return nil, &InvalidNodesJsonError{}
+		return nil, NewInvalidNodesJsonError()
 	}
 
 	id, err := s.repository.Insert(guide)
@@ -92,7 +92,7 @@ func (s *guideServiceImpl) Update(id uint, params UpdateParams) error {
 	if params.NodesJson != "" {
 		err := guide.SetNodesFromJSON(params.NodesJson)
 		if err != nil {
-			return &InvalidNodesJsonError{}
+			return NewInvalidNodesJsonError()
 		}
 	}
 

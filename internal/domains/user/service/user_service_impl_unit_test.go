@@ -65,9 +65,9 @@ func Test_userServiceImpl_FindById(t *testing.T) {
 			name:               "Should return storage error for invalid ID error",
 			args:               args{0},
 			userFromRepository: nil,
-			errFromRepository:  &userRepository.InvalidIdError{},
+			errFromRepository:  userRepository.NewInvalidIdError(),
 			want:               nil,
-			wantErr:            uservice.NewStorageError((&userRepository.InvalidIdError{}).Error()),
+			wantErr:            uservice.NewStorageError((userRepository.NewInvalidIdError()).Error()),
 		},
 		{
 			name:               "Should return storage error for common repository error",
@@ -209,7 +209,7 @@ func Test_userServiceImpl_Register(t *testing.T) {
 			errFromRepositoryOnFind: nil,
 			idFromInsert:            0,
 			want:                    nil,
-			wantErr:                 &EmailAlreadyExistError{},
+			wantErr:                 NewEmailAlreadyExistError(),
 		},
 		{
 			name:              "Should return error on repository error",

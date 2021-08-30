@@ -29,7 +29,7 @@ func NewUserRepositoryPostgresql(db *gorm.DB) *userRepositoryPostgresql {
 
 func (r *userRepositoryPostgresql) FindOne(condition FindCondition) (userEntity.User, error) {
 	if condition.ID == 0 && condition.Email == "" {
-		return nil, &InvalidFindConditionError{}
+		return nil, NewInvalidFindConditionError()
 	}
 
 	um := &userModel{
@@ -58,7 +58,7 @@ func (r *userRepositoryPostgresql) Insert(u userEntity.User) (id uint, err error
 		return 0, err
 	}
 	if alreadyExistsUser != nil {
-		return 0, &UserAlreadyExistsError{}
+		return 0, NewUserAlreadyExistsError()
 	}
 
 	um := &userModel{
@@ -76,7 +76,7 @@ func (r *userRepositoryPostgresql) Insert(u userEntity.User) (id uint, err error
 
 func (r *userRepositoryPostgresql) Update(u userEntity.User) error {
 	if u.ID() == 0 {
-		return &InvalidIdError{}
+		return NewInvalidIdError()
 	}
 
 	user, err := r.FindOne(FindCondition{ID: u.ID()})

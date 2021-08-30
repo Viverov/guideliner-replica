@@ -2,29 +2,12 @@ package entity
 
 import "fmt"
 
-type RootNodeAlreadySetError struct{}
-
-func (e *RootNodeAlreadySetError) Error() string {
-	return "root nodeImpl already set"
-}
-
-type NodeNotFoundError struct {
-	nodeId uint
-}
-
-func (n *NodeNotFoundError) Error() string {
-	return fmt.Sprintf("node with %d not found.", n.nodeId)
-}
-
-type InvalidConditionTypeError struct {
-}
-
-func (i *InvalidConditionTypeError) Error() string {
-	return "conditionType not found"
-}
-
 type UnexpectedGuideError struct {
 	info string
+}
+
+func NewUnexpectedGuideError(info string) *UnexpectedGuideError {
+	return &UnexpectedGuideError{info: info}
 }
 
 func (u *UnexpectedGuideError) Error() string {
@@ -33,11 +16,19 @@ func (u *UnexpectedGuideError) Error() string {
 
 type InvalidJsonError struct{}
 
+func NewInvalidJsonError() *InvalidJsonError {
+	return &InvalidJsonError{}
+}
+
 func (e *InvalidJsonError) Error() string {
 	return "invalid json passed"
 }
 
 type InvalidIdError struct{}
+
+func NewInvalidIdError() *InvalidIdError {
+	return &InvalidIdError{}
+}
 
 func (e *InvalidIdError) Error() string {
 	return "id must be above zero"

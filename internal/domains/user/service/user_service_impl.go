@@ -58,7 +58,7 @@ func (u *userServiceImpl) Register(email string, password string) (userEntity.Us
 	}
 
 	if alreadyExistUser != nil {
-		return nil, &EmailAlreadyExistError{}
+		return nil, NewEmailAlreadyExistError()
 	}
 
 	user, err := userEntity.NewUserWithRawPassword(0, email, password)
