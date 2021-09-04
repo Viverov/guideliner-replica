@@ -308,6 +308,88 @@ func Test_guideServiceImpl_FindById(t *testing.T) {
 	}
 }
 
+func Test_guideServiceImpl_Count(t *testing.T) {
+	type args struct {
+		cond CountConditions
+	}
+	type resFromRep struct {
+		count  int64
+		err    error
+	}
+	tests := []struct {
+		name       string
+		args       args
+		resFromRep resFromRep
+		want       int64
+		wantErr    error
+	}{
+		{
+			name: "Should return count without conditions",
+			args: args{
+				cond: CountConditions{},
+			},
+			resFromRep: resFromRep{
+				count: 10,
+				err: nil,
+			},
+			want: 10,
+			wantErr: nil,
+		},
+		{
+			name: "Should pass conditions into repository",
+			args: args{
+				cond: CountConditions{
+					Search: "testing",
+				},
+			},
+			resFromRep: resFromRep{
+				count: 10,
+				err:    nil,
+			},
+			want:    10,
+			wantErr: nil,
+		},
+		{
+			name: "Should process error from repository",
+			args: args{
+				cond: CountConditions{},
+			},
+			resFromRep: resFromRep{
+				count: 0,
+				err:    urepo.NewUnexpectedRepositoryError("test", "text"),
+			},
+			want:    0,
+			wantErr: uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("test", "text").Error()),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl, rep := prepareMocks(t)
+			s := &guideServiceImpl{
+				repository: rep,
+			}
+
+			rep.
+				EXPECT().
+				Count(gomock.Eq(repository.CountConditions{
+					Search:                tt.args.cond.Search,
+				})).Return(tt.resFromRep.count, tt.resFromRep.err)
+
+			got, err := s.Count(tt.args.cond)
+
+			assert.Equal(t, tt.want, got)
+
+			if tt.wantErr != nil {
+				assert.EqualError(t, err, tt.wantErr.Error())
+			} else {
+				assert.Nil(t, err)
+			}
+
+			ctrl.Finish()
+		})
+	}
+}
+
 func Test_guideServiceImpl_Update(t *testing.T) {
 	type args struct {
 		id     uint

@@ -50,6 +50,15 @@ func (s *guideServiceImpl) FindById(id uint) (entity.GuideDTO, error) {
 	return dto, nil
 }
 
+func (s *guideServiceImpl) Count(cond CountConditions) (int64, error) {
+	count, err := s.repository.Count(repository.CountConditions{Search: cond.Search})
+	if err != nil {
+		return 0, processRepositoryError(err)
+	}
+
+	return count, nil
+}
+
 func (s *guideServiceImpl) Create(description string, nodesJson string) (entity.GuideDTO, error) {
 	guide, err := entity.NewGuide(0, "{}", "")
 	if err != nil {
