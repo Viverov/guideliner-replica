@@ -5,6 +5,7 @@ import (
 	"github.com/Viverov/guideliner/internal/config"
 	"github.com/Viverov/guideliner/internal/cradle"
 	"github.com/Viverov/guideliner/internal/db"
+	"github.com/Viverov/guideliner/internal/domains/guide"
 	"github.com/Viverov/guideliner/internal/domains/user"
 	"github.com/Viverov/guideliner/internal/server"
 	"os"
@@ -36,6 +37,7 @@ func main() {
 
 	// Init services
 	cradleBuilder.SetUserService(user.BuildUserService(cfg.Tokens.SecretKey, dbInstance))
+	cradleBuilder.SetGuideService(guide.BuildGuideService(dbInstance))
 
 	cradleObj := cradleBuilder.Build()
 	fmt.Println("Done!")

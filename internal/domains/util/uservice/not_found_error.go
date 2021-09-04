@@ -2,7 +2,7 @@ package uservice
 
 import "fmt"
 
-// NotFoundError must be returned on actions (ex: findOne, update, patch, delete) with non-existent entities
+// NotFoundError must be returned on actions (ex: update, patch, delete) with non-existent entities
 type NotFoundError struct {
 	entityName string
 	id         uint
