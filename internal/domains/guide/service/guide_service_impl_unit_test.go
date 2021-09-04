@@ -313,8 +313,8 @@ func Test_guideServiceImpl_Count(t *testing.T) {
 		cond CountConditions
 	}
 	type resFromRep struct {
-		count  int64
-		err    error
+		count int64
+		err   error
 	}
 	tests := []struct {
 		name       string
@@ -330,9 +330,9 @@ func Test_guideServiceImpl_Count(t *testing.T) {
 			},
 			resFromRep: resFromRep{
 				count: 10,
-				err: nil,
+				err:   nil,
 			},
-			want: 10,
+			want:    10,
 			wantErr: nil,
 		},
 		{
@@ -344,7 +344,7 @@ func Test_guideServiceImpl_Count(t *testing.T) {
 			},
 			resFromRep: resFromRep{
 				count: 10,
-				err:    nil,
+				err:   nil,
 			},
 			want:    10,
 			wantErr: nil,
@@ -356,7 +356,7 @@ func Test_guideServiceImpl_Count(t *testing.T) {
 			},
 			resFromRep: resFromRep{
 				count: 0,
-				err:    urepo.NewUnexpectedRepositoryError("test", "text"),
+				err:   urepo.NewUnexpectedRepositoryError("test", "text"),
 			},
 			want:    0,
 			wantErr: uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("test", "text").Error()),
@@ -372,7 +372,7 @@ func Test_guideServiceImpl_Count(t *testing.T) {
 			rep.
 				EXPECT().
 				Count(gomock.Eq(repository.CountConditions{
-					Search:                tt.args.cond.Search,
+					Search: tt.args.cond.Search,
 				})).Return(tt.resFromRep.count, tt.resFromRep.err)
 
 			got, err := s.Count(tt.args.cond)

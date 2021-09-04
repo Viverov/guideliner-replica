@@ -131,7 +131,7 @@ func Test_guideRepositoryPsql_Find(t *testing.T) {
 			args: args{
 				FindConditions{
 					DefaultFindConditions: util.DefaultFindConditions{},
-					Search: "est2", // We have only one record that meets the condition - "test2"
+					Search:                "est2", // We have only one record that meets the condition - "test2"
 				},
 			},
 			want:    testGuideData[1:2],
@@ -169,7 +169,6 @@ func Test_guideRepositoryPsql_Find(t *testing.T) {
 	cleanUpTestData()
 }
 
-
 func Test_guideRepositoryPsql_Count(t *testing.T) {
 	// Setup test data (before all)
 	testGuideData := prepareTestData()
@@ -186,7 +185,7 @@ func Test_guideRepositoryPsql_Count(t *testing.T) {
 		{
 			name: "Should return count without conditions",
 			args: args{
-			CountConditions{},
+				CountConditions{},
 			},
 			want:    int64(len(testGuideData)),
 			wantErr: nil,
@@ -194,7 +193,7 @@ func Test_guideRepositoryPsql_Count(t *testing.T) {
 		{
 			name: "Should return count with 'search' condition",
 			args: args{
-			CountConditions{
+				CountConditions{
 					Search: "est1",
 				},
 			},
