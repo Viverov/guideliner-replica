@@ -3,7 +3,7 @@ package repository
 import (
 	"errors"
 	userEntity "github.com/Viverov/guideliner/internal/domains/user/entity"
-	urepo "github.com/Viverov/guideliner/internal/domains/util/urepo"
+	"github.com/Viverov/guideliner/internal/domains/util/urepo"
 	"gorm.io/gorm"
 )
 

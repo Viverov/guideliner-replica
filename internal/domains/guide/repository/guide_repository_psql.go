@@ -72,6 +72,22 @@ func (r *guideRepositoryPsql) Find(condition FindConditions) ([]entity.Guide, er
 	return guides, nil
 }
 
+func (r *guideRepositoryPsql) Count(cond CountConditions) (int64, error) {
+	tx := r.db.Model(&guideModel{})
+	if cond.Search != "" {
+		tx = tx.Where("Description ILIKE ?", fmt.Sprint("%", cond.Search, "%"))
+	}
+
+	var count int64
+	result := tx.Count(&count)
+
+	if result.Error != nil {
+		return 0, urepo.NewUnexpectedRepositoryError("Count", result.Error.Error())
+	}
+
+	return count, nil
+}
+
 func (r *guideRepositoryPsql) Insert(guide entity.Guide) (id uint, err error) {
 	if guide == nil {
 		return 0, urepo.NewNilEntityError("Guide")
