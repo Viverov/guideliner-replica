@@ -11,8 +11,8 @@ func NewHomeController() *Controller {
 	return &Controller{}
 }
 
-func (h *Controller) Init(router *gin.Engine, cradle *cradle.Cradle) {
-	router.GET("/ping", pingHandler)
+func (h *Controller) Init(router *gin.Engine, cradle *cradle.Cradle, prefix string) {
+	router.GET(prefix + "/ping", pingHandler)
 }
 
 func pingHandler(c *gin.Context) {

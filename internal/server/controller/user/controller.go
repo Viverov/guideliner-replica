@@ -20,16 +20,16 @@ func NewUserController(responder utils.HttpResponder) *Controller {
 	}
 }
 
-func (uc *Controller) Init(router *gin.Engine, cradle *cradle.Cradle) {
-	router.POST("/users/registration", createRegisterHandler(cradle, uc.httpResponder))
-	router.POST("/users/login", createLoginHandler(cradle, uc.httpResponder))
+func (uc *Controller) Init(router *gin.Engine, cradle *cradle.Cradle, prefix string) {
+	router.POST(prefix + "/users/registration", createRegisterHandler(cradle, uc.httpResponder))
+	router.POST(prefix + "/users/login", createLoginHandler(cradle, uc.httpResponder))
 	router.GET(
-		"/users/me",
+		prefix + "/users/me",
 		middleware.CreateAuthMiddleware(cradle, uc.httpResponder),
 		createMeHandler(cradle, uc.httpResponder),
 	)
 	router.POST(
-		"/users/change_password",
+		prefix + "/users/change_password",
 		middleware.CreateAuthMiddleware(cradle, uc.httpResponder),
 		createChangePasswordHandler(cradle, uc.httpResponder),
 	)

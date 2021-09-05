@@ -21,17 +21,17 @@ func NewGuideController(httpResponder utils.HttpResponder) *Controller {
 	return &Controller{httpResponder: httpResponder}
 }
 
-func (c *Controller) Init(router *gin.Engine, cradle *cradle.Cradle) {
-	router.GET("/guides", createFindHandler(cradle, c.httpResponder))
-	router.GET("/guides/:id", createFindByIdHandler(cradle, c.httpResponder))
-	router.POST("/guides", middleware.CreateAuthMiddleware(cradle, c.httpResponder), createNewGuideHandler(cradle, c.httpResponder))
-	router.PATCH("/guides/:id", middleware.CreateAuthMiddleware(cradle, c.httpResponder), createUpdateHandler(cradle, c.httpResponder))
+func (c *Controller) Init(router *gin.Engine, cradle *cradle.Cradle, prefix string) {
+	router.GET(prefix + "/guides", createFindHandler(cradle, c.httpResponder))
+	router.GET(prefix + "/guides/:id", createFindByIdHandler(cradle, c.httpResponder))
+	router.POST(prefix + "/guides", middleware.CreateAuthMiddleware(cradle, c.httpResponder), createNewGuideHandler(cradle, c.httpResponder))
+	router.PATCH(prefix + "/guides/:id", middleware.CreateAuthMiddleware(cradle, c.httpResponder), createUpdateHandler(cradle, c.httpResponder))
 }
 
 type guideResponse struct {
-	ID          uint   `json:"id,omitempty"`
-	Description string `json:"description,omitempty"`
-	Nodes       string `json:"nodes,omitempty"`
+	ID          uint   `json:"id"`
+	Description string `json:"description"`
+	Nodes       string `json:"nodes"`
 }
 
 type findQuery struct {
@@ -43,8 +43,8 @@ type findQuery struct {
 }
 
 type findResult struct {
-	Guides []guideResponse `json:"guides,omitempty"`
-	Total  int64           `json:"total,omitempty"`
+	Guides []guideResponse `json:"guides"`
+	Total  int64           `json:"total"`
 }
 
 func createFindHandler(cradle *cradle.Cradle, responder utils.HttpResponder) func(ctx *gin.Context) {
@@ -165,8 +165,8 @@ func createNewGuideHandler(cradle *cradle.Cradle, responder utils.HttpResponder)
 }
 
 type updateBody struct {
-	Description string `json:"description,omitempty" binding:"required"`
-	Nodes       string `json:"nodes,omitempty" binding:"required"`
+	Description string `json:"description" binding:"required"`
+	Nodes       string `json:"nodes" binding:"required"`
 }
 
 type updateResponse struct {
@@ -198,7 +198,7 @@ func createUpdateHandler(cradle *cradle.Cradle, responder utils.HttpResponder) f
 		if err != nil {
 			switch err.(type) {
 			case *uservice.NotFoundError:
-				responder.Response(ctx, http.StatusBadRequest, "Invalid ID", fmt.Sprintf("Expected uint, got %s", sID), err.Error())
+				responder.Response(ctx, http.StatusNotFound, "Not found", fmt.Sprintf("Guide with id %d not found", id), err.Error())
 				return
 			case *service.InvalidNodesJsonError:
 				responder.Response(ctx, http.StatusBadRequest, "Invalid nodes format", err.Error(), "")

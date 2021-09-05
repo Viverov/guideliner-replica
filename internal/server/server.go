@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/Viverov/guideliner/internal/cradle"
+	"github.com/Viverov/guideliner/internal/server/controller/guide"
 	"github.com/Viverov/guideliner/internal/server/controller/home"
 	"github.com/Viverov/guideliner/internal/server/controller/user"
 	"github.com/Viverov/guideliner/internal/server/controller/utils"
@@ -31,10 +32,11 @@ func Init(cradle *cradle.Cradle) *Server {
 	// Add controllers
 	controllers = append(controllers, home.NewHomeController())
 	controllers = append(controllers, user.NewUserController(httpResponder))
+	controllers = append(controllers, guide.NewGuideController(httpResponder))
 
 	// Init all controllers
 	for _, c := range controllers {
-		c.Init(r, cradle)
+		c.Init(r, cradle, "/api/v1")
 	}
 
 	return &Server{
