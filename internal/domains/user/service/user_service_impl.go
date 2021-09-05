@@ -52,15 +52,6 @@ func (u *userServiceImpl) FindByEmail(email string) (userEntity.UserDTO, error) 
 }
 
 func (u *userServiceImpl) Register(email string, password string) (userEntity.UserDTO, error) {
-	alreadyExistUser, err := u.FindByEmail(email)
-	if err != nil {
-		return nil, err
-	}
-
-	if alreadyExistUser != nil {
-		return nil, NewEmailAlreadyExistError()
-	}
-
 	user, err := userEntity.NewUserWithRawPassword(0, email, password)
 	if err != nil {
 		return nil, uservice.NewUnexpectedServiceError()
@@ -157,6 +148,8 @@ func processRepositoryError(err error) error {
 	switch t := err.(type) {
 	case *userRepository.InvalidIdError:
 		return uservice.NewStorageError(t.Error())
+	case *userRepository.UserAlreadyExistsError:
+		return NewEmailAlreadyExistError()
 	default:
 		return uservice.CheckDefaultRepoErrors(err)
 	}
@@ -164,7 +157,7 @@ func processRepositoryError(err error) error {
 
 func processTokenError(err error) error {
 	switch e := err.(type) {
-	case *tokens.UnexpectedTokenError, *tokens.NotTokenError:
+	case *tokens.UnexpectedTokenError, *tokens.NotTokenError, *tokens.ExpiredTokenError:
 		return e
 	default:
 		return uservice.NewUnexpectedServiceError()

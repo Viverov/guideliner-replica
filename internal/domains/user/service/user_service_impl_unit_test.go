@@ -185,40 +185,36 @@ func Test_userServiceImpl_Register(t *testing.T) {
 		password string
 	}
 	tests := []struct {
-		name                    string
-		args                    args
-		alreadyExistsUser       entity.User
-		errFromRepositoryOnFind error
-		idFromInsert            uint
-		want                    entity.UserDTO
-		wantErr                 error
+		name          string
+		args          args
+		idFromInsert  uint
+		errFromInsert error
+		want          entity.UserDTO
+		wantErr       error
 	}{
 		{
-			name:                    "Should register new user",
-			args:                    args{email: "someemail@email.com", password: "abcdefasdasdasd"},
-			alreadyExistsUser:       nil,
-			errFromRepositoryOnFind: nil,
-			idFromInsert:            10,
-			want:                    entity.NewUserDTO(10, "someemail@email.com"),
-			wantErr:                 nil,
+			name:          "Should register new user",
+			args:          args{email: "someemail@email.com", password: "abcdefasdasdasd"},
+			idFromInsert:  10,
+			errFromInsert: nil,
+			want:          entity.NewUserDTO(10, "someemail@email.com"),
+			wantErr:       nil,
 		},
 		{
-			name:                    "Should return error for already existing user",
-			args:                    args{email: "someemail@email.com", password: "abcdefasdasdasd"},
-			alreadyExistsUser:       func() entity.User { u, _ := entity.NewUser(10, "someemail@email.com", "abcdef"); return u }(),
-			errFromRepositoryOnFind: nil,
-			idFromInsert:            0,
-			want:                    nil,
-			wantErr:                 NewEmailAlreadyExistError(),
+			name:          "Should return error for already existing user",
+			args:          args{email: "someemail@email.com", password: "abcdefasdasdasd"},
+			idFromInsert:  0,
+			errFromInsert: userRepository.NewUserAlreadyExistsError(),
+			want:          nil,
+			wantErr:       NewEmailAlreadyExistError(),
 		},
 		{
-			name:                    "Should return error on repository error",
-			args:                    args{email: "someemail@email.com", password: "abcdefasdasdasd"},
-			alreadyExistsUser:       nil,
-			errFromRepositoryOnFind: urepo.NewUnexpectedRepositoryError("find", "test"),
-			idFromInsert:            0,
-			want:                    nil,
-			wantErr:                 uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("find", "test").Error()),
+			name:          "Should return error on repository error",
+			args:          args{email: "someemail@email.com", password: "abcdefasdasdasd"},
+			idFromInsert:  0,
+			errFromInsert: urepo.NewUnexpectedRepositoryError("find", "test"),
+			want:          nil,
+			wantErr:       uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("find", "test").Error()),
 		},
 	}
 	for _, tt := range tests {
@@ -233,15 +229,8 @@ func Test_userServiceImpl_Register(t *testing.T) {
 
 			userRepositoryMock.
 				EXPECT().
-				FindOne(userRepository.FindCondition{Email: tt.args.email}).
-				Return(tt.alreadyExistsUser, tt.errFromRepositoryOnFind)
-
-			if tt.idFromInsert != 0 {
-				userRepositoryMock.
-					EXPECT().
-					Insert(gomock.Any()).
-					Return(tt.idFromInsert, nil)
-			}
+				Insert(gomock.Any()).
+				Return(tt.idFromInsert, tt.errFromInsert)
 
 			// Actions
 			got, err := u.Register(tt.args.email, tt.args.password)

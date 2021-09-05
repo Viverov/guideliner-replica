@@ -2,7 +2,8 @@ package cradle
 
 import (
 	"github.com/Viverov/guideliner/internal/config"
-	userService "github.com/Viverov/guideliner/internal/domains/user/service"
+	gs "github.com/Viverov/guideliner/internal/domains/guide/service"
+	us "github.com/Viverov/guideliner/internal/domains/user/service"
 	"gorm.io/gorm"
 )
 
@@ -14,7 +15,8 @@ type Cradle struct {
 	sqlDB *gorm.DB
 
 	// Services section
-	userService userService.UserService
+	userService  us.UserService
+	guideService gs.GuideService
 }
 
 func (c *Cradle) GetConfig() *config.Config {
@@ -25,6 +27,10 @@ func (c *Cradle) GetSqlDB() *gorm.DB {
 	return c.sqlDB
 }
 
-func (c *Cradle) GetUserService() userService.UserService {
+func (c *Cradle) GetUserService() us.UserService {
 	return c.userService
+}
+
+func (c *Cradle) GetGuideService() gs.GuideService {
+	return c.guideService
 }

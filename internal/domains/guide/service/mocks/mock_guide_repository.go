@@ -35,6 +35,21 @@ func (m *MockGuideRepository) EXPECT() *MockGuideRepositoryMockRecorder {
 	return m.recorder
 }
 
+// Count mocks base method.
+func (m *MockGuideRepository) Count(arg0 repository.CountConditions) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Count", arg0)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Count indicates an expected call of Count.
+func (mr *MockGuideRepositoryMockRecorder) Count(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockGuideRepository)(nil).Count), arg0)
+}
+
 // Find mocks base method.
 func (m *MockGuideRepository) Find(arg0 repository.FindConditions) ([]entity.Guide, error) {
 	m.ctrl.T.Helper()

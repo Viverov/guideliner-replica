@@ -125,6 +125,18 @@ func Test_guideRepositoryPsql_Find(t *testing.T) {
 			}(),
 			wantErr: nil,
 		},
+
+		{
+			name: "Should return records by search field",
+			args: args{
+				FindConditions{
+					DefaultFindConditions: util.DefaultFindConditions{},
+					Search:                "est2", // We have only one record that meets the condition - "test2"
+				},
+			},
+			want:    testGuideData[1:2],
+			wantErr: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -134,7 +146,7 @@ func Test_guideRepositoryPsql_Find(t *testing.T) {
 			guides, err := r.Find(tt.args.condition)
 
 			if tt.want != nil {
-				assert.Equal(t, len(guides), len(tt.want))
+				assert.Equal(t, len(tt.want), len(guides))
 				for i, g := range guides {
 					assert.Equal(t, tt.want[i].ID, g.ID())
 					assert.Equal(t, tt.want[i].Description, g.Description())
@@ -145,6 +157,58 @@ func Test_guideRepositoryPsql_Find(t *testing.T) {
 				assert.Nil(t, tt.want)
 			}
 
+			if tt.wantErr != nil {
+				assert.EqualError(t, err, tt.wantErr.Error())
+			} else {
+				assert.Nil(t, err)
+			}
+		})
+	}
+
+	// Clean up (after all)
+	cleanUpTestData()
+}
+
+func Test_guideRepositoryPsql_Count(t *testing.T) {
+	// Setup test data (before all)
+	testGuideData := prepareTestData()
+
+	type args struct {
+		condition CountConditions
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    int64
+		wantErr error
+	}{
+		{
+			name: "Should return count without conditions",
+			args: args{
+				CountConditions{},
+			},
+			want:    int64(len(testGuideData)),
+			wantErr: nil,
+		},
+		{
+			name: "Should return count with 'search' condition",
+			args: args{
+				CountConditions{
+					Search: "est1",
+				},
+			},
+			want:    2, // We have two records that meets the condition - "test1" and "test10"
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &guideRepositoryPsql{
+				db: dbInstance,
+			}
+			count, err := r.Count(tt.args.condition)
+
+			assert.Equal(t, tt.want, count)
 			if tt.wantErr != nil {
 				assert.EqualError(t, err, tt.wantErr.Error())
 			} else {

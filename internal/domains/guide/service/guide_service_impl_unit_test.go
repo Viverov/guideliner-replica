@@ -251,7 +251,7 @@ func Test_guideServiceImpl_FindById(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name: "Should return not found error on undefined user",
+			name: "Should return nil on undefined user",
 			args: args{
 				id: 10,
 			},
@@ -260,7 +260,7 @@ func Test_guideServiceImpl_FindById(t *testing.T) {
 				err:    nil,
 			},
 			want:    nil,
-			wantErr: uservice.NewNotFoundError("Guide", 10),
+			wantErr: nil,
 		},
 		{
 			name: "Should return error on repository error",
@@ -308,6 +308,88 @@ func Test_guideServiceImpl_FindById(t *testing.T) {
 	}
 }
 
+func Test_guideServiceImpl_Count(t *testing.T) {
+	type args struct {
+		cond CountConditions
+	}
+	type resFromRep struct {
+		count int64
+		err   error
+	}
+	tests := []struct {
+		name       string
+		args       args
+		resFromRep resFromRep
+		want       int64
+		wantErr    error
+	}{
+		{
+			name: "Should return count without conditions",
+			args: args{
+				cond: CountConditions{},
+			},
+			resFromRep: resFromRep{
+				count: 10,
+				err:   nil,
+			},
+			want:    10,
+			wantErr: nil,
+		},
+		{
+			name: "Should pass conditions into repository",
+			args: args{
+				cond: CountConditions{
+					Search: "testing",
+				},
+			},
+			resFromRep: resFromRep{
+				count: 10,
+				err:   nil,
+			},
+			want:    10,
+			wantErr: nil,
+		},
+		{
+			name: "Should process error from repository",
+			args: args{
+				cond: CountConditions{},
+			},
+			resFromRep: resFromRep{
+				count: 0,
+				err:   urepo.NewUnexpectedRepositoryError("test", "text"),
+			},
+			want:    0,
+			wantErr: uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("test", "text").Error()),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl, rep := prepareMocks(t)
+			s := &guideServiceImpl{
+				repository: rep,
+			}
+
+			rep.
+				EXPECT().
+				Count(gomock.Eq(repository.CountConditions{
+					Search: tt.args.cond.Search,
+				})).Return(tt.resFromRep.count, tt.resFromRep.err)
+
+			got, err := s.Count(tt.args.cond)
+
+			assert.Equal(t, tt.want, got)
+
+			if tt.wantErr != nil {
+				assert.EqualError(t, err, tt.wantErr.Error())
+			} else {
+				assert.Nil(t, err)
+			}
+
+			ctrl.Finish()
+		})
+	}
+}
+
 func Test_guideServiceImpl_Update(t *testing.T) {
 	type args struct {
 		id     uint
@@ -326,6 +408,7 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 		resFromRepOnFind   resFromRepOnFind
 		repUpdateExpected  bool
 		resFromRepOnUpdate resFromRepOnUpdate
+		want               entity.GuideDTO
 		wantErr            error
 	}{
 		{
@@ -345,6 +428,7 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 			resFromRepOnUpdate: resFromRepOnUpdate{
 				err: nil,
 			},
+			want:    entity.NewGuideDTO(10, "newDesc", "{}"),
 			wantErr: nil,
 		},
 		{
@@ -362,6 +446,7 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 			},
 			repUpdateExpected:  false,
 			resFromRepOnUpdate: resFromRepOnUpdate{},
+			want:               nil,
 			wantErr:            uservice.NewNotFoundError("Guide", 10),
 		},
 		{
@@ -381,6 +466,7 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 			resFromRepOnUpdate: resFromRepOnUpdate{
 				err: urepo.NewUnexpectedRepositoryError("test", "text"),
 			},
+			want:    nil,
 			wantErr: uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("test", "text").Error()),
 		},
 	}
@@ -403,7 +489,16 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 					Return(tt.resFromRepOnUpdate.err)
 			}
 
-			err := s.Update(tt.args.id, tt.args.params)
+			got, err := s.Update(tt.args.id, tt.args.params)
+
+			if tt.want != nil {
+				assert.NotNil(t, got)
+				assert.Equal(t, tt.want.ID(), got.ID())
+				assert.Equal(t, tt.want.Description(), got.Description())
+				assert.Equal(t, tt.want.NodesJson(), got.NodesJson())
+			} else {
+				assert.Nil(t, got)
+			}
 
 			if tt.wantErr != nil {
 				assert.EqualError(t, err, tt.wantErr.Error())

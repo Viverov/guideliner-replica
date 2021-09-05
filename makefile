@@ -13,14 +13,23 @@ tests-unit: generate
 tests-integration: generate
 	./cmd/sh/tests-integration.sh
 
-run-guideliner-debug:
-	GUIDELINER_ENV=debug go run ./cmd/guildeliner/main.go
+run-guideliner-debug: build-guideliner
+	GUIDELINER_ENV=debug go run ./cmd/guideliner/main.go
 
-run-guideliner-development:
-	GUIDELINER_ENV=development go run ./cmd/guildeliner/main.go
+run-guideliner-development: build-guideliner
+	GUIDELINER_ENV=development go run ./cmd/guideliner/main.go
 
-run-guideliner-production:
-	GUIDELINER_ENV=production go run ./cmd/guildeliner/main.go
+run-guideliner-production: build-guideliner
+	GUIDELINER_ENV=production go run ./cmd/guideliner/main.go
+
+run-migrations-debug: build-migrations
+	GUIDELINER_ENV=debug go run ./cmd/migrations/main.go
+
+run-migrations-development: build-migrations
+	GUIDELINER_ENV=development go run ./cmd/migrations/main.go
+
+run-migrations-production: build-migrations
+	GUIDELINER_ENV=production go run ./cmd/migrations/main.go
 
 vendor:
 	go mod vendor
