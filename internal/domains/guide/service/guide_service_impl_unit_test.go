@@ -428,7 +428,7 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 			resFromRepOnUpdate: resFromRepOnUpdate{
 				err: nil,
 			},
-			want: entity.NewGuideDTO(10, "newDesc", "{}"),
+			want:    entity.NewGuideDTO(10, "newDesc", "{}"),
 			wantErr: nil,
 		},
 		{
@@ -446,7 +446,7 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 			},
 			repUpdateExpected:  false,
 			resFromRepOnUpdate: resFromRepOnUpdate{},
-			want: nil,
+			want:               nil,
 			wantErr:            uservice.NewNotFoundError("Guide", 10),
 		},
 		{
@@ -466,7 +466,7 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 			resFromRepOnUpdate: resFromRepOnUpdate{
 				err: urepo.NewUnexpectedRepositoryError("test", "text"),
 			},
-			want: nil,
+			want:    nil,
 			wantErr: uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("test", "text").Error()),
 		},
 	}
