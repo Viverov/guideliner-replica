@@ -3,7 +3,6 @@ package service
 import (
 	"github.com/Viverov/guideliner/internal/domains/guide/entity"
 	"github.com/Viverov/guideliner/internal/domains/guide/repository"
-	"github.com/Viverov/guideliner/internal/domains/util/urepo"
 	"github.com/Viverov/guideliner/internal/domains/util/uservice"
 )
 
@@ -40,6 +39,9 @@ func (s *guideServiceImpl) FindById(id uint) (entity.GuideDTO, error) {
 	guide, err := s.findEntityById(id)
 	if err != nil {
 		return nil, err
+	}
+	if guide == nil {
+		return nil, nil
 	}
 
 	dto, err := entity.NewGuideDTOFromEntity(guide)
@@ -83,16 +85,19 @@ func (s *guideServiceImpl) Create(description string, nodesJson string) (entity.
 
 	dto, err := entity.NewGuideDTOFromEntity(guide)
 	if err != nil {
-		return nil, err
+		return nil, uservice.NewUnexpectedServiceError()
 	}
 
 	return dto, nil
 }
 
-func (s *guideServiceImpl) Update(id uint, params UpdateParams) error {
+func (s *guideServiceImpl) Update(id uint, params UpdateParams) (entity.GuideDTO, error) {
 	guide, err := s.findEntityById(id)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	if guide == nil {
+		return nil, uservice.NewNotFoundError("Guide", id)
 	}
 
 	if params.Description != "" {
@@ -101,25 +106,27 @@ func (s *guideServiceImpl) Update(id uint, params UpdateParams) error {
 	if params.NodesJson != "" {
 		err := guide.SetNodesFromJSON(params.NodesJson)
 		if err != nil {
-			return NewInvalidNodesJsonError()
+			return nil, NewInvalidNodesJsonError()
 		}
 	}
 
 	err = s.repository.Update(guide)
 	if err != nil {
-		return processRepositoryError(err)
+		return nil, processRepositoryError(err)
 	}
 
-	return nil
+	dto, err := entity.NewGuideDTOFromEntity(guide)
+	if err != nil {
+		return nil, uservice.NewUnexpectedServiceError()
+	}
+
+	return dto, nil
 }
 
 func (s *guideServiceImpl) findEntityById(id uint) (entity.Guide, error) {
 	guide, err := s.repository.FindById(id)
 	if err != nil {
 		return nil, processRepositoryError(err)
-	}
-	if guide == nil {
-		return nil, urepo.NewEntityNotFoundError("Guide", id)
 	}
 
 	return guide, err

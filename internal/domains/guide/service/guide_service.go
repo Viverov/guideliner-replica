@@ -10,7 +10,7 @@ type GuideService interface {
 	FindById(id uint) (entity.GuideDTO, error)
 	Count(CountConditions) (count int64, err error)
 	Create(description string, nodesJson string) (entity.GuideDTO, error)
-	Update(id uint, params UpdateParams) error
+	Update(id uint, params UpdateParams) (entity.GuideDTO, error)
 }
 
 type FindConditions struct {
