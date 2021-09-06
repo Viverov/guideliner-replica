@@ -17,6 +17,7 @@ type guideModel struct {
 	gorm.Model
 	Description string `gorm:"not null"`
 	NodesJson   string `gorm:"not null"`
+	CreatorId   uint
 }
 
 func (g guideModel) TableName() string {
