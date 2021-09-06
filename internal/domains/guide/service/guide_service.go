@@ -11,6 +11,8 @@ type GuideService interface {
 	Count(CountConditions) (count int64, err error)
 	Create(description string, nodesJson string, creatorID uint) (entity.GuideDTO, error)
 	Update(id uint, params UpdateParams) (entity.GuideDTO, error)
+	CheckPermission(guideID uint, userID uint, permission Permission) (bool, error)
+	GetPermissions(guideID uint, userID uint) ([]Permission, error)
 }
 
 type FindConditions struct {
@@ -26,3 +28,9 @@ type UpdateParams struct {
 	Description string
 	NodesJson   string
 }
+
+type Permission string
+
+const (
+	PermissionUpdate Permission = "UPDATE"
+)

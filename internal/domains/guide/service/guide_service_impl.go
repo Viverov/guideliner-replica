@@ -117,6 +117,37 @@ func (s *guideServiceImpl) Update(id uint, params UpdateParams) (entity.GuideDTO
 	return dto, nil
 }
 
+func (s *guideServiceImpl) CheckPermission(guideID uint, userID uint, permission Permission) (bool, error) {
+	permissions, err := s.GetPermissions(guideID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	for _, p := range permissions {
+		if p == permission {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (s *guideServiceImpl) GetPermissions(guideID uint, userID uint) ([]Permission, error) {
+	guide, err := s.findEntityById(guideID)
+	if err != nil {
+		return nil, err
+	}
+	if guide == nil {
+		return nil, uservice.NewNotFoundError("Guide", guideID)
+	}
+
+	var permissions []Permission
+	if guide.CreatorID() == userID {
+		permissions = append(permissions, PermissionUpdate)
+	}
+
+	return permissions, nil
+}
+
 func (s *guideServiceImpl) findEntityById(id uint) (entity.Guide, error) {
 	guide, err := s.repository.FindById(id)
 	if err != nil {

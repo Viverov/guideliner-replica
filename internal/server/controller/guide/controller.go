@@ -146,13 +146,7 @@ func createNewGuideHandler(cradle *cradle.Cradle, responder utils.HttpResponder)
 			return
 		}
 
-		sID := ctx.Param("userID")
-		uID, err := strconv.ParseUint(sID, 10, 32)
-		if err != nil {
-			responder.Response(ctx, http.StatusBadRequest, "Invalid ID", fmt.Sprintf("Expected uint, got %s", sID), err.Error())
-			return
-		}
-		userID := uint(uID)
+		userID := utils.ParseUserIDFromCtx(ctx)
 
 		dto, err := cradle.GetGuideService().Create(body.Description, body.Nodes, userID)
 		if err != nil {
@@ -194,7 +188,8 @@ func createUpdateHandler(cradle *cradle.Cradle, responder utils.HttpResponder) f
 			responder.Response(ctx, http.StatusBadRequest, "Invalid ID", fmt.Sprintf("Expected uint, got %s", sID), err.Error())
 			return
 		}
-		id := uint(uID)
+		guideID := uint(uID)
+		userID := utils.ParseUserIDFromCtx(ctx)
 
 		body := &updateBody{}
 		if err := ctx.ShouldBindJSON(body); err != nil {
@@ -202,14 +197,30 @@ func createUpdateHandler(cradle *cradle.Cradle, responder utils.HttpResponder) f
 			return
 		}
 
-		dto, err := cradle.GetGuideService().Update(id, service.UpdateParams{
+		permissionGranted, err := cradle.GetGuideService().CheckPermission(guideID, userID, service.PermissionUpdate)
+		if err != nil {
+			switch err.(type) {
+			case *uservice.NotFoundError:
+				responder.Response(ctx, http.StatusNotFound, "Not found", fmt.Sprintf("Guide with id %d not found", guideID), err.Error())
+				return
+			default:
+				responder.InternalError(ctx, err.Error())
+				return
+			}
+		}
+		if !permissionGranted {
+			responder.Response(ctx, http.StatusForbidden, "Not enough permissions", "", "")
+			return
+		}
+
+		dto, err := cradle.GetGuideService().Update(guideID, service.UpdateParams{
 			Description: body.Description,
 			NodesJson:   body.Nodes,
 		})
 		if err != nil {
 			switch err.(type) {
 			case *uservice.NotFoundError:
-				responder.Response(ctx, http.StatusNotFound, "Not found", fmt.Sprintf("Guide with id %d not found", id), err.Error())
+				responder.Response(ctx, http.StatusNotFound, "Not found", fmt.Sprintf("Guide with id %d not found", guideID), err.Error())
 				return
 			case *service.InvalidNodesJsonError:
 				responder.Response(ctx, http.StatusBadRequest, "Invalid nodes format", err.Error(), "")
