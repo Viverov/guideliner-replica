@@ -9,7 +9,7 @@ type GuideService interface {
 	Find(FindConditions) ([]entity.GuideDTO, error)
 	FindById(id uint) (entity.GuideDTO, error)
 	Count(CountConditions) (count int64, err error)
-	Create(description string, nodesJson string) (entity.GuideDTO, error)
+	Create(description string, nodesJson string, creatorID uint) (entity.GuideDTO, error)
 	Update(id uint, params UpdateParams) (entity.GuideDTO, error)
 }
 

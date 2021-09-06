@@ -40,6 +40,7 @@ func Test_guideServiceImpl_Create(t *testing.T) {
 	type args struct {
 		description string
 		nodesJson   string
+		creatorID   uint
 	}
 	type resFromRepo struct {
 		id  uint
@@ -57,8 +58,9 @@ func Test_guideServiceImpl_Create(t *testing.T) {
 			args: args{
 				description: "Some guide",
 				nodesJson:   "{}",
+				creatorID:   10,
 			},
-			want:        entity.NewGuideDTO(0, "Some guide", "{}"),
+			want:        entity.NewGuideDTO(0, "Some guide", "{}", 10),
 			wantErr:     nil,
 			resFromRepo: resFromRepo{id: 10, err: nil},
 		},
@@ -67,6 +69,7 @@ func Test_guideServiceImpl_Create(t *testing.T) {
 			args: args{
 				description: "Some guide",
 				nodesJson:   "{}",
+				creatorID:   50,
 			},
 			want:        nil,
 			wantErr:     uservice.NewStorageError(urepo.NewUnexpectedRepositoryError("test", "text").Error()),
@@ -86,12 +89,13 @@ func Test_guideServiceImpl_Create(t *testing.T) {
 				Insert(gomock.Any()).
 				Return(tt.resFromRepo.id, tt.resFromRepo.err)
 
-			got, err := s.Create(tt.args.description, tt.args.nodesJson)
+			got, err := s.Create(tt.args.description, tt.args.nodesJson, tt.args.creatorID)
 
 			if tt.want != nil {
 				assert.Equal(t, tt.resFromRepo.id, got.ID())
 				assert.Equal(t, tt.want.Description(), got.Description())
 				assert.Equal(t, tt.want.NodesJson(), got.NodesJson())
+				assert.Equal(t, tt.want.CreatorID(), got.CreatorID())
 			} else {
 				assert.Nil(t, got)
 			}
@@ -131,7 +135,7 @@ func Test_guideServiceImpl_Find(t *testing.T) {
 				guides: func() []entity.Guide {
 					var guides []entity.Guide
 					for i := 0; i < 5; i++ {
-						g, _ := entity.NewGuide(10, "{}", "test"+strconv.Itoa(i))
+						g, _ := entity.NewGuide(uint(10+i), "{}", "test"+strconv.Itoa(i), uint(50+i))
 						guides = append(guides, g)
 					}
 					return guides
@@ -141,7 +145,7 @@ func Test_guideServiceImpl_Find(t *testing.T) {
 			want: func() []entity.GuideDTO {
 				var dtos []entity.GuideDTO
 				for i := 0; i < 5; i++ {
-					dto := entity.NewGuideDTO(10, "test"+strconv.Itoa(i), "{}")
+					dto := entity.NewGuideDTO(uint(10+i), "test"+strconv.Itoa(i), "{}", uint(50+i))
 					dtos = append(dtos, dto)
 				}
 				return dtos
@@ -207,6 +211,7 @@ func Test_guideServiceImpl_Find(t *testing.T) {
 					assert.Equal(t, tt.want[i].ID(), dto.ID())
 					assert.Equal(t, tt.want[i].Description(), dto.Description())
 					assert.Equal(t, tt.want[i].NodesJson(), dto.NodesJson())
+					assert.Equal(t, tt.want[i].CreatorID(), dto.CreatorID())
 				}
 			} else {
 				assert.Nil(t, got)
@@ -244,10 +249,10 @@ func Test_guideServiceImpl_FindById(t *testing.T) {
 				id: 10,
 			},
 			resFromRep: resFromRep{
-				entity: func() entity.Guide { g, _ := entity.NewGuide(10, "{}", "testdesc"); return g }(),
+				entity: func() entity.Guide { g, _ := entity.NewGuide(10, "{}", "testdesc", 50); return g }(),
 				err:    nil,
 			},
-			want:    entity.NewGuideDTO(10, "testdesc", "{}"),
+			want:    entity.NewGuideDTO(10, "testdesc", "{}", 50),
 			wantErr: nil,
 		},
 		{
@@ -293,6 +298,7 @@ func Test_guideServiceImpl_FindById(t *testing.T) {
 				assert.Equal(t, tt.want.ID(), got.ID())
 				assert.Equal(t, tt.want.Description(), got.Description())
 				assert.Equal(t, tt.want.NodesJson(), got.NodesJson())
+				assert.Equal(t, tt.want.CreatorID(), got.CreatorID())
 			} else {
 				assert.Nil(t, got)
 			}
@@ -421,14 +427,14 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 				},
 			},
 			resFromRepOnFind: resFromRepOnFind{
-				guide: func() entity.Guide { g, _ := entity.NewGuide(10, "{}", "desc"); return g }(),
+				guide: func() entity.Guide { g, _ := entity.NewGuide(10, "{}", "desc", 50); return g }(),
 				err:   nil,
 			},
 			repUpdateExpected: true,
 			resFromRepOnUpdate: resFromRepOnUpdate{
 				err: nil,
 			},
-			want:    entity.NewGuideDTO(10, "newDesc", "{}"),
+			want:    entity.NewGuideDTO(10, "newDesc", "{}", 50),
 			wantErr: nil,
 		},
 		{
@@ -459,7 +465,7 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 				},
 			},
 			resFromRepOnFind: resFromRepOnFind{
-				guide: func() entity.Guide { g, _ := entity.NewGuide(10, "{}", "desc"); return g }(),
+				guide: func() entity.Guide { g, _ := entity.NewGuide(10, "{}", "desc", 50); return g }(),
 				err:   nil,
 			},
 			repUpdateExpected: true,
@@ -496,6 +502,7 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 				assert.Equal(t, tt.want.ID(), got.ID())
 				assert.Equal(t, tt.want.Description(), got.Description())
 				assert.Equal(t, tt.want.NodesJson(), got.NodesJson())
+				assert.Equal(t, tt.want.CreatorID(), got.CreatorID())
 			} else {
 				assert.Nil(t, got)
 			}

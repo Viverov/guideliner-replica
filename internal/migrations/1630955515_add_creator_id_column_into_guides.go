@@ -9,7 +9,7 @@ type GuideModelWithCreatorId struct {
 	gorm.Model
 	Description string `gorm:"not null"`
 	NodesJson   string `gorm:"not null"`
-	CreatorId   uint
+	CreatorID   uint
 }
 
 func (u GuideModelWithCreatorId) TableName() string {
@@ -20,10 +20,10 @@ func addCreatorColumnIntoGuides() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "1630955515",
 		Migrate: func(tx *gorm.DB) error {
-			return tx.Migrator().AddColumn(&GuideModelWithCreatorId{}, "CreatorId")
+			return tx.Migrator().AddColumn(&GuideModelWithCreatorId{}, "CreatorID")
 		},
 		Rollback: func(tx *gorm.DB) error {
-			return tx.Migrator().DropColumn(&GuideModelWithCreatorId{}, "CreatorId")
+			return tx.Migrator().DropColumn(&GuideModelWithCreatorId{}, "CreatorID")
 		},
 	}
 }

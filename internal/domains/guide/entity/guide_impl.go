@@ -9,19 +9,22 @@ type guideImpl struct {
 	id          uint
 	description string
 	rootNode    *node
+	creatorID   uint
 }
 
-func NewGuide(id uint, nodesJson string, description string) (*guideImpl, error) {
+func NewGuide(id uint, nodesJson string, description string, creatorID uint) (*guideImpl, error) {
 	g := &guideImpl{
 		id:          id,
 		description: "",
 		rootNode:    nil,
+		creatorID:   0,
 	}
 	g.SetDescription(description)
 	err := g.SetNodesFromJSON(nodesJson)
 	if err != nil {
 		return nil, err
 	}
+	g.SetCreatorID(creatorID)
 
 	return g, nil
 }
@@ -64,4 +67,12 @@ func (g *guideImpl) SetNodesFromJSON(nodesJson string) error {
 	g.rootNode = rootNode
 
 	return nil
+}
+
+func (g *guideImpl) CreatorID() uint {
+	return g.creatorID
+}
+
+func (g *guideImpl) SetCreatorID(creatorID uint) {
+	g.creatorID = creatorID
 }

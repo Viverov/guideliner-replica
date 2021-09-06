@@ -61,14 +61,8 @@ func (s *guideServiceImpl) Count(cond CountConditions) (int64, error) {
 	return count, nil
 }
 
-func (s *guideServiceImpl) Create(description string, nodesJson string) (entity.GuideDTO, error) {
-	guide, err := entity.NewGuide(0, "{}", "")
-	if err != nil {
-		return nil, uservice.NewUnexpectedServiceError()
-	}
-
-	guide.SetDescription(description)
-	err = guide.SetNodesFromJSON(nodesJson)
+func (s *guideServiceImpl) Create(description string, nodesJson string, creatorID uint) (entity.GuideDTO, error) {
+	guide, err := entity.NewGuide(0, nodesJson, description, creatorID)
 	if err != nil {
 		return nil, NewInvalidNodesJsonError()
 	}

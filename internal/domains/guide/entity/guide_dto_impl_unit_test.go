@@ -33,11 +33,13 @@ func TestNewGuideDTOFromEntity(t *testing.T) {
 						},
 					},
 				},
+				creatorID: 10,
 			}},
 			want: &guideDTOImpl{
 				id:          10,
 				description: "test",
 				nodesJSON:   "{\"condition\":{\"type\":\"MANUAL\"},\"text\":\"node_1_text\",\"next_nodes\":[{\"condition\":{\"type\":\"TIME\",\"duration\":60000000000},\"text\":\"inner_node_1_text\"}]}",
+				creatorID:   10,
 			},
 			wantErr: nil,
 		},
@@ -64,6 +66,7 @@ func TestNewGuideDTOFromEntity(t *testing.T) {
 				assert.Equal(t, tt.want.ID(), got.ID())
 				assert.Equal(t, tt.want.Description(), got.Description())
 				assert.Equal(t, tt.want.NodesJson(), got.NodesJson())
+				assert.Equal(t, tt.want.CreatorID(), got.CreatorID())
 			} else {
 				assert.EqualError(t, err, tt.wantErr.Error())
 			}
@@ -166,6 +169,42 @@ func Test_guideDTOImpl_NodesJson(t *testing.T) {
 				nodesJSON:   tt.fields.nodesJson,
 			}
 			assert.Equal(t, tt.want, g.NodesJson())
+		})
+	}
+}
+
+func Test_guideDTOImpl_CreatorID(t *testing.T) {
+	type fields struct {
+		id          uint
+		description string
+		nodesJson   string
+		creatorID   uint
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   uint
+	}{
+		{
+			name: "Should return creatorID",
+			fields: fields{
+				id:          10,
+				description: "",
+				nodesJson:   "{a:2, b:3}",
+				creatorID:   50,
+			},
+			want: 50,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := &guideDTOImpl{
+				id:          tt.fields.id,
+				description: tt.fields.description,
+				nodesJSON:   tt.fields.nodesJson,
+				creatorID:   tt.fields.creatorID,
+			}
+			assert.Equal(t, tt.want, g.CreatorID())
 		})
 	}
 }

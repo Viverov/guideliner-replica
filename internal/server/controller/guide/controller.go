@@ -135,6 +135,7 @@ type createResponse struct {
 	ID          uint   `json:"id"`
 	Description string `json:"description"`
 	Nodes       string `json:"nodes"`
+	CreatorID   uint   `json:"creator_id"`
 }
 
 func createNewGuideHandler(cradle *cradle.Cradle, responder utils.HttpResponder) func(ctx *gin.Context) {
@@ -145,7 +146,15 @@ func createNewGuideHandler(cradle *cradle.Cradle, responder utils.HttpResponder)
 			return
 		}
 
-		dto, err := cradle.GetGuideService().Create(body.Description, body.Nodes)
+		sID := ctx.Param("userID")
+		uID, err := strconv.ParseUint(sID, 10, 32)
+		if err != nil {
+			responder.Response(ctx, http.StatusBadRequest, "Invalid ID", fmt.Sprintf("Expected uint, got %s", sID), err.Error())
+			return
+		}
+		userID := uint(uID)
+
+		dto, err := cradle.GetGuideService().Create(body.Description, body.Nodes, userID)
 		if err != nil {
 			switch err.(type) {
 			case *service.InvalidNodesJsonError:
@@ -160,6 +169,7 @@ func createNewGuideHandler(cradle *cradle.Cradle, responder utils.HttpResponder)
 			ID:          dto.ID(),
 			Description: dto.Description(),
 			Nodes:       dto.NodesJson(),
+			CreatorID:   dto.CreatorID(),
 		})
 	}
 }
@@ -173,6 +183,7 @@ type updateResponse struct {
 	ID          uint   `json:"id"`
 	Description string `json:"description"`
 	Nodes       string `json:"nodes"`
+	CreatorID   uint   `json:"creator_id"`
 }
 
 func createUpdateHandler(cradle *cradle.Cradle, responder utils.HttpResponder) func(ctx *gin.Context) {
@@ -213,6 +224,7 @@ func createUpdateHandler(cradle *cradle.Cradle, responder utils.HttpResponder) f
 			ID:          dto.ID(),
 			Description: dto.Description(),
 			Nodes:       dto.NodesJson(),
+			CreatorID:   dto.CreatorID(),
 		})
 	}
 }

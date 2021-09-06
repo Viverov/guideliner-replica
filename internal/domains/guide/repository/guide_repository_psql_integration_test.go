@@ -292,7 +292,7 @@ func Test_guideRepositoryPsql_Insert(t *testing.T) {
 		{
 			name: "Should create new record in db",
 			args: args{
-				guide: func() entity.Guide { g, _ := entity.NewGuide(0, "{}", "description"); return g }(),
+				guide: func() entity.Guide { g, _ := entity.NewGuide(0, "{}", "description", 50); return g }(),
 			},
 			wantErr: nil,
 		},
@@ -330,6 +330,7 @@ func Test_guideRepositoryPsql_Insert(t *testing.T) {
 				nj, err := tt.args.guide.NodesToJSON()
 				assert.Nil(t, err)
 				assert.Equal(t, nj, gm.NodesJson)
+				assert.Equal(t, tt.args.guide.CreatorID(), gm.CreatorID)
 			}
 		})
 
@@ -354,7 +355,9 @@ func Test_guideRepositoryPsql_Update(t *testing.T) {
 				guide: func() entity.Guide {
 					g, _ := entity.NewGuide(5,
 						"{\"condition\":{\"type\":\"MANUAL\"},\"text\":\"node_1_text\",\"next_nodes\":[{\"condition\":{\"type\":\"TIME\",\"duration\":60000000000},\"text\":\"inner_node_1_text\"}]}",
-						"new description")
+						"new description",
+						50,
+					)
 					return g
 				}(),
 			},
@@ -364,7 +367,7 @@ func Test_guideRepositoryPsql_Update(t *testing.T) {
 		{
 			name: "Should return error for undefined entity",
 			args: args{
-				guide: func() entity.Guide { g, _ := entity.NewGuide(55, "{}", "nvm"); return g }(),
+				guide: func() entity.Guide { g, _ := entity.NewGuide(55, "{}", "nvm", 50); return g }(),
 			},
 			updatedTestDataID: 0,
 			wantErr:           urepo.NewEntityNotFoundError("Guide", 55),
