@@ -22,10 +22,10 @@ func NewGuideController(httpResponder utils.HttpResponder) *Controller {
 }
 
 func (c *Controller) Init(router *gin.Engine, cradle *cradle.Cradle, prefix string) {
-	router.GET(prefix + "/guides", createFindHandler(cradle, c.httpResponder))
-	router.GET(prefix + "/guides/:id", createFindByIdHandler(cradle, c.httpResponder))
-	router.POST(prefix + "/guides", middleware.CreateAuthMiddleware(cradle, c.httpResponder), createNewGuideHandler(cradle, c.httpResponder))
-	router.PATCH(prefix + "/guides/:id", middleware.CreateAuthMiddleware(cradle, c.httpResponder), createUpdateHandler(cradle, c.httpResponder))
+	router.GET(prefix+"/guides", createFindHandler(cradle, c.httpResponder))
+	router.GET(prefix+"/guides/:id", createFindByIdHandler(cradle, c.httpResponder))
+	router.POST(prefix+"/guides", middleware.CreateAuthMiddleware(cradle, c.httpResponder), createNewGuideHandler(cradle, c.httpResponder))
+	router.PATCH(prefix+"/guides/:id", middleware.CreateAuthMiddleware(cradle, c.httpResponder), createUpdateHandler(cradle, c.httpResponder))
 }
 
 type guideResponse struct {
