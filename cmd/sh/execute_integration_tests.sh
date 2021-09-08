@@ -9,6 +9,10 @@ make build-migrations
 make build-clean-db
 
 /bin/sh $SCRIPTPATH/../sh/wait_for_postgresql.sh
+status=$?
+if [ $status -ne 0 ]; then
+  exit $status
+fi
 
 echo >&2 "Clean db..."
 "$SCRIPTPATH"/../../bin/clean_db
@@ -20,6 +24,10 @@ echo >&2 "Run server..."
 "$SCRIPTPATH"/../../bin/guideliner &
 
 /bin/sh "$SCRIPTPATH"/../sh/wait_for_server.sh
+status=$?
+if [ $status -ne 0 ]; then
+  exit $status
+fi
 
 go test -p 1 ./internal/... --tags=integration
 
