@@ -41,7 +41,7 @@ jobs:
 #          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 #          aws-region: us-east-1
       - name: Install aws cli
-        run: apt-get install awscli
+        run: sudo apt-get install awscli
       - name: Configure aws
         run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} --profile default && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --profile default
       - name: Upload build into S3
