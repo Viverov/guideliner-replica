@@ -4,13 +4,15 @@ type guideDTOImpl struct {
 	id          uint
 	description string
 	nodesJSON   string
+	creatorID   uint
 }
 
-func NewGuideDTO(id uint, description string, nodesJSON string) *guideDTOImpl {
+func NewGuideDTO(id uint, description string, nodesJSON string, creatorID uint) *guideDTOImpl {
 	return &guideDTOImpl{
 		id:          id,
 		description: description,
 		nodesJSON:   nodesJSON,
+		creatorID:   creatorID,
 	}
 }
 
@@ -23,6 +25,7 @@ func NewGuideDTOFromEntity(guide Guide) (*guideDTOImpl, error) {
 		id:          guide.ID(),
 		description: guide.Description(),
 		nodesJSON:   nodesJson,
+		creatorID:   guide.CreatorID(),
 	}, nil
 }
 
@@ -36,4 +39,8 @@ func (g *guideDTOImpl) Description() string {
 
 func (g *guideDTOImpl) NodesJson() string {
 	return g.nodesJSON
+}
+
+func (g *guideDTOImpl) CreatorID() uint {
+	return g.creatorID
 }

@@ -22,10 +22,10 @@ func NewGuideController(httpResponder utils.HttpResponder) *Controller {
 }
 
 func (c *Controller) Init(router *gin.Engine, cradle *cradle.Cradle, prefix string) {
-	router.GET(prefix + "/guides", createFindHandler(cradle, c.httpResponder))
-	router.GET(prefix + "/guides/:id", createFindByIdHandler(cradle, c.httpResponder))
-	router.POST(prefix + "/guides", middleware.CreateAuthMiddleware(cradle, c.httpResponder), createNewGuideHandler(cradle, c.httpResponder))
-	router.PATCH(prefix + "/guides/:id", middleware.CreateAuthMiddleware(cradle, c.httpResponder), createUpdateHandler(cradle, c.httpResponder))
+	router.GET(prefix+"/guides", createFindHandler(cradle, c.httpResponder))
+	router.GET(prefix+"/guides/:id", createFindByIdHandler(cradle, c.httpResponder))
+	router.POST(prefix+"/guides", middleware.CreateAuthMiddleware(cradle, c.httpResponder), createNewGuideHandler(cradle, c.httpResponder))
+	router.PATCH(prefix+"/guides/:id", middleware.CreateAuthMiddleware(cradle, c.httpResponder), createUpdateHandler(cradle, c.httpResponder))
 }
 
 type guideResponse struct {
@@ -135,6 +135,7 @@ type createResponse struct {
 	ID          uint   `json:"id"`
 	Description string `json:"description"`
 	Nodes       string `json:"nodes"`
+	CreatorID   uint   `json:"creator_id"`
 }
 
 func createNewGuideHandler(cradle *cradle.Cradle, responder utils.HttpResponder) func(ctx *gin.Context) {
@@ -145,7 +146,9 @@ func createNewGuideHandler(cradle *cradle.Cradle, responder utils.HttpResponder)
 			return
 		}
 
-		dto, err := cradle.GetGuideService().Create(body.Description, body.Nodes)
+		userID := utils.ParseUserIDFromCtx(ctx)
+
+		dto, err := cradle.GetGuideService().Create(body.Description, body.Nodes, userID)
 		if err != nil {
 			switch err.(type) {
 			case *service.InvalidNodesJsonError:
@@ -160,19 +163,21 @@ func createNewGuideHandler(cradle *cradle.Cradle, responder utils.HttpResponder)
 			ID:          dto.ID(),
 			Description: dto.Description(),
 			Nodes:       dto.NodesJson(),
+			CreatorID:   dto.CreatorID(),
 		})
 	}
 }
 
 type updateBody struct {
-	Description string `json:"description" binding:"required"`
-	Nodes       string `json:"nodes" binding:"required"`
+	Description string `json:"description"`
+	Nodes       string `json:"nodes"`
 }
 
 type updateResponse struct {
 	ID          uint   `json:"id"`
 	Description string `json:"description"`
 	Nodes       string `json:"nodes"`
+	CreatorID   uint   `json:"creator_id"`
 }
 
 func createUpdateHandler(cradle *cradle.Cradle, responder utils.HttpResponder) func(ctx *gin.Context) {
@@ -183,22 +188,42 @@ func createUpdateHandler(cradle *cradle.Cradle, responder utils.HttpResponder) f
 			responder.Response(ctx, http.StatusBadRequest, "Invalid ID", fmt.Sprintf("Expected uint, got %s", sID), err.Error())
 			return
 		}
-		id := uint(uID)
+		guideID := uint(uID)
+		userID := utils.ParseUserIDFromCtx(ctx)
 
 		body := &updateBody{}
 		if err := ctx.ShouldBindJSON(body); err != nil {
 			responder.Response(ctx, http.StatusBadRequest, "Validation error", err.Error(), "")
 			return
 		}
+		if body.Nodes == "" && body.Description == "" {
+			responder.Response(ctx, http.StatusBadRequest, "Validation error", "nodes or description must be defined", "")
+		}
 
-		dto, err := cradle.GetGuideService().Update(id, service.UpdateParams{
+		permissionGranted, err := cradle.GetGuideService().CheckPermission(guideID, userID, service.PermissionUpdate)
+		if err != nil {
+			switch err.(type) {
+			case *uservice.NotFoundError:
+				responder.Response(ctx, http.StatusNotFound, "Not found", fmt.Sprintf("Guide with id %d not found", guideID), err.Error())
+				return
+			default:
+				responder.InternalError(ctx, err.Error())
+				return
+			}
+		}
+		if !permissionGranted {
+			responder.Response(ctx, http.StatusForbidden, "Not enough permissions", "", "")
+			return
+		}
+
+		dto, err := cradle.GetGuideService().Update(guideID, service.UpdateParams{
 			Description: body.Description,
 			NodesJson:   body.Nodes,
 		})
 		if err != nil {
 			switch err.(type) {
 			case *uservice.NotFoundError:
-				responder.Response(ctx, http.StatusNotFound, "Not found", fmt.Sprintf("Guide with id %d not found", id), err.Error())
+				responder.Response(ctx, http.StatusNotFound, "Not found", fmt.Sprintf("Guide with id %d not found", guideID), err.Error())
 				return
 			case *service.InvalidNodesJsonError:
 				responder.Response(ctx, http.StatusBadRequest, "Invalid nodes format", err.Error(), "")
@@ -213,6 +238,7 @@ func createUpdateHandler(cradle *cradle.Cradle, responder utils.HttpResponder) f
 			ID:          dto.ID(),
 			Description: dto.Description(),
 			Nodes:       dto.NodesJson(),
+			CreatorID:   dto.CreatorID(),
 		})
 	}
 }

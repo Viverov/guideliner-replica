@@ -17,6 +17,7 @@ type guideModel struct {
 	gorm.Model
 	Description string `gorm:"not null"`
 	NodesJson   string `gorm:"not null"`
+	CreatorID   uint
 }
 
 func (g guideModel) TableName() string {
@@ -45,7 +46,7 @@ func (r *guideRepositoryPsql) FindById(id uint) (entity.Guide, error) {
 		return nil, urepo.NewUnexpectedRepositoryError("FindById", result.Error.Error())
 	}
 
-	return entity.NewGuide(gm.ID, gm.NodesJson, gm.Description)
+	return entity.NewGuide(gm.ID, gm.NodesJson, gm.Description, gm.CreatorID)
 }
 
 func (r *guideRepositoryPsql) Find(condition FindConditions) ([]entity.Guide, error) {
@@ -62,7 +63,7 @@ func (r *guideRepositoryPsql) Find(condition FindConditions) ([]entity.Guide, er
 
 	var guides []entity.Guide
 	for _, gm := range gms {
-		g, err := entity.NewGuide(gm.ID, gm.NodesJson, gm.Description)
+		g, err := entity.NewGuide(gm.ID, gm.NodesJson, gm.Description, gm.CreatorID)
 		if err != nil {
 			return nil, err
 		}
@@ -99,6 +100,7 @@ func (r *guideRepositoryPsql) Insert(guide entity.Guide) (id uint, err error) {
 	gm := &guideModel{
 		Description: guide.Description(),
 		NodesJson:   nodesJson,
+		CreatorID:   guide.CreatorID(),
 	}
 	result := r.db.Create(gm)
 

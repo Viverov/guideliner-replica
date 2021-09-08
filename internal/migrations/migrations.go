@@ -7,6 +7,7 @@ func GetMigrationsList() []*gormigrate.Migration {
 
 	migrationsList = append(migrationsList, createUserTable())
 	migrationsList = append(migrationsList, createGuidesTable())
+	migrationsList = append(migrationsList, addCreatorColumnIntoGuides())
 
 	return migrationsList
 }

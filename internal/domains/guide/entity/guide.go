@@ -7,4 +7,6 @@ type Guide interface {
 	SetDescription(description string)
 	NodesToJSON() (string, error)
 	SetNodesFromJSON(string) error
+	CreatorID() uint
+	SetCreatorID(uint)
 }

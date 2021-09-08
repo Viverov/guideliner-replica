@@ -15,6 +15,7 @@ func TestNewGuide(t *testing.T) {
 		id          uint
 		nodesJson   string
 		description string
+		creatorID   uint
 	}
 	tests := []struct {
 		name    string
@@ -28,6 +29,7 @@ func TestNewGuide(t *testing.T) {
 				id:          10,
 				nodesJson:   "{}",
 				description: "test description",
+				creatorID:   30,
 			},
 			want: &guideImpl{
 				id: 10,
@@ -37,6 +39,7 @@ func TestNewGuide(t *testing.T) {
 					NextNodes: nil,
 				},
 				description: "test description",
+				creatorID:   30,
 			},
 			wantErr: nil,
 		},
@@ -46,6 +49,7 @@ func TestNewGuide(t *testing.T) {
 				id:          10,
 				nodesJson:   "asdasdasdasd",
 				description: "test description",
+				creatorID:   30,
 			},
 			want:    nil,
 			wantErr: NewInvalidJsonError(),
@@ -56,6 +60,7 @@ func TestNewGuide(t *testing.T) {
 				id:          10,
 				nodesJson:   "{\"condition\":{\"type\":\"MANUAL\"},\"text\":\"node_1_text\",\"next_nodes\":[{\"condition\":{\"type\":\"TIME\",\"duration\":60000000000},\"text\":\"inner_node_1_text\"}]}",
 				description: "test description",
+				creatorID:   30,
 			},
 			want: &guideImpl{
 				id:          10,
@@ -71,6 +76,7 @@ func TestNewGuide(t *testing.T) {
 						},
 					},
 				},
+				creatorID: 30,
 			},
 			wantErr: nil,
 		},
@@ -80,6 +86,7 @@ func TestNewGuide(t *testing.T) {
 				id:          10,
 				nodesJson:   "{\"some\":\"field\",\"condition\":{\"type\":\"MANUAL\"},\"text\":\"node_1_text\"}",
 				description: "test description",
+				creatorID:   30,
 			},
 			want: &guideImpl{
 				id:          10,
@@ -89,13 +96,14 @@ func TestNewGuide(t *testing.T) {
 					Text:      "node_1_text",
 					NextNodes: []*node{},
 				},
+				creatorID: 30,
 			},
 			wantErr: nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewGuide(tt.args.id, tt.args.nodesJson, tt.args.description)
+			got, err := NewGuide(tt.args.id, tt.args.nodesJson, tt.args.description, tt.args.creatorID)
 
 			if tt.wantErr == nil {
 				assert.Nil(t, err)
@@ -104,6 +112,7 @@ func TestNewGuide(t *testing.T) {
 				// Check base info
 				assert.Equal(t, tt.want.id, got.id)
 				assert.Equal(t, tt.want.description, got.description)
+				assert.Equal(t, tt.want.creatorID, got.creatorID)
 
 				// Check nodes
 				checkNodes(t, tt.want.rootNode, got.rootNode)
@@ -366,6 +375,86 @@ func Test_guideImpl_SetNodesFromJSON(t *testing.T) {
 				assert.Nil(t, g.rootNode)
 				assert.EqualError(t, err, tt.wantErr.Error())
 			}
+		})
+	}
+}
+
+func Test_guideImpl_CreatorID(t *testing.T) {
+	type fields struct {
+		id          uint
+		description string
+		rootNode    *node
+		creatorID   uint
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   uint
+	}{
+		{
+			name: "Should return creator ID",
+			fields: fields{
+				id:          10,
+				description: "desc",
+				rootNode:    &node{},
+				creatorID:   50,
+			},
+			want: 50,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := &guideImpl{
+				id:          tt.fields.id,
+				description: tt.fields.description,
+				rootNode:    tt.fields.rootNode,
+				creatorID:   tt.fields.creatorID,
+			}
+
+			got := g.CreatorID()
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func Test_guideImpl_SetCreatorID(t *testing.T) {
+	type fields struct {
+		id          uint
+		description string
+		rootNode    *node
+		creatorID   uint
+	}
+	type args struct {
+		creatorID uint
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+	}{
+		{
+			name: "Should set creator ID",
+			fields: fields{
+				id:          10,
+				description: "desc",
+				rootNode:    &node{},
+				creatorID:   50,
+			},
+			args: args{
+				creatorID: 30,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := &guideImpl{
+				id:          tt.fields.id,
+				description: tt.fields.description,
+				rootNode:    tt.fields.rootNode,
+				creatorID:   tt.fields.creatorID,
+			}
+			g.SetCreatorID(tt.args.creatorID)
+			assert.Equal(t, tt.args.creatorID, g.creatorID)
 		})
 	}
 }
