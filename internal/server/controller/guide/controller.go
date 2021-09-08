@@ -169,8 +169,8 @@ func createNewGuideHandler(cradle *cradle.Cradle, responder utils.HttpResponder)
 }
 
 type updateBody struct {
-	Description string `json:"description" binding:"required"`
-	Nodes       string `json:"nodes" binding:"required"`
+	Description string `json:"description"`
+	Nodes       string `json:"nodes"`
 }
 
 type updateResponse struct {
@@ -195,6 +195,9 @@ func createUpdateHandler(cradle *cradle.Cradle, responder utils.HttpResponder) f
 		if err := ctx.ShouldBindJSON(body); err != nil {
 			responder.Response(ctx, http.StatusBadRequest, "Validation error", err.Error(), "")
 			return
+		}
+		if body.Nodes == "" && body.Description == "" {
+			responder.Response(ctx, http.StatusBadRequest, "Validation error", "nodes or description must be defined", "")
 		}
 
 		permissionGranted, err := cradle.GetGuideService().CheckPermission(guideID, userID, service.PermissionUpdate)

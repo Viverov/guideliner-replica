@@ -100,6 +100,7 @@ func (r *guideRepositoryPsql) Insert(guide entity.Guide) (id uint, err error) {
 	gm := &guideModel{
 		Description: guide.Description(),
 		NodesJson:   nodesJson,
+		CreatorID:   guide.CreatorID(),
 	}
 	result := r.db.Create(gm)
 
