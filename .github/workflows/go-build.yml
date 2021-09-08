@@ -45,7 +45,7 @@ jobs:
       - name: Configure aws
         run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} --profile default && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --profile default && aws configure set region us-east-1 --profile default
       - name: Upload build into S3
-        run: aws s3 cp ./bin/guideliner s3://${{ secrets.AWS_BUCKET_NAME }}/guideliner-${{ matrix.linux_arch }}-${{ steps.date.outputs.date }} --endpoint-url ${{ secrets.AWS_ENDPOINT }}
+        run: aws s3 cp ./bin/guideliner_${{ matrix.linux_arch }}_${{ steps.date.outputs.date }} s3://${{ secrets.AWS_BUCKET_NAME }}/guideliner_${{ matrix.linux_arch }}_${{ steps.date.outputs.date }} --endpoint-url ${{ secrets.AWS_ENDPOINT }}
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2
         with:
