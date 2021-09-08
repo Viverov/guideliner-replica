@@ -36,9 +36,9 @@ func (s *guideServiceImpl) Find(cond FindConditions) ([]entity.GuideDTO, error) 
 }
 
 func (s *guideServiceImpl) FindById(id uint) (entity.GuideDTO, error) {
-	guide, err := s.findEntityById(id)
+	guide, err := s.repository.FindById(id)
 	if err != nil {
-		return nil, err
+		return nil, processRepositoryError(err)
 	}
 	if guide == nil {
 		return nil, nil
@@ -86,9 +86,9 @@ func (s *guideServiceImpl) Create(description string, nodesJson string, creatorI
 }
 
 func (s *guideServiceImpl) Update(id uint, params UpdateParams) (entity.GuideDTO, error) {
-	guide, err := s.findEntityById(id)
+	guide, err := s.repository.FindById(id)
 	if err != nil {
-		return nil, err
+		return nil, processRepositoryError(err)
 	}
 	if guide == nil {
 		return nil, uservice.NewNotFoundError("Guide", id)
@@ -132,29 +132,20 @@ func (s *guideServiceImpl) CheckPermission(guideID uint, userID uint, permission
 }
 
 func (s *guideServiceImpl) GetPermissions(guideID uint, userID uint) ([]Permission, error) {
-	guide, err := s.findEntityById(guideID)
+	guide, err := s.repository.FindById(guideID)
 	if err != nil {
-		return nil, err
+		return nil, processRepositoryError(err)
 	}
 	if guide == nil {
 		return nil, uservice.NewNotFoundError("Guide", guideID)
 	}
 
-	var permissions []Permission
+	permissions := []Permission{}
 	if guide.CreatorID() == userID {
 		permissions = append(permissions, PermissionUpdate)
 	}
 
 	return permissions, nil
-}
-
-func (s *guideServiceImpl) findEntityById(id uint) (entity.Guide, error) {
-	guide, err := s.repository.FindById(id)
-	if err != nil {
-		return nil, processRepositoryError(err)
-	}
-
-	return guide, err
 }
 
 func processRepositoryError(err error) error {

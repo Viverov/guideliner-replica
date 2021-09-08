@@ -518,6 +518,180 @@ func Test_guideServiceImpl_Update(t *testing.T) {
 	}
 }
 
+func Test_guideServiceImpl_CheckPermission(t *testing.T) {
+	type args struct {
+		guideID    uint
+		userID     uint
+		permission Permission
+	}
+	type resFromRepoOnFind struct {
+		guide entity.Guide
+		err   error
+	}
+	tests := []struct {
+		name              string
+		args              args
+		resFromRepoOnFind resFromRepoOnFind
+		want              bool
+		wantErr           error
+	}{
+		{
+			name: "Should return true for valid permission",
+			args: args{
+				guideID:    10,
+				userID:     30,
+				permission: PermissionUpdate,
+			},
+			resFromRepoOnFind: resFromRepoOnFind{
+				guide: func() entity.Guide { g, _ := entity.NewGuide(10, "{}", "desc", 30); return g }(),
+				err:   nil,
+			},
+			want:    true,
+			wantErr: nil,
+		},
+		{
+			name: "Should return false for invalid permission",
+			args: args{
+				guideID:    10,
+				userID:     50,
+				permission: PermissionUpdate,
+			},
+			resFromRepoOnFind: resFromRepoOnFind{
+				guide: func() entity.Guide { g, _ := entity.NewGuide(10, "{}", "desc", 30); return g }(),
+				err:   nil,
+			},
+			want:    false,
+			wantErr: nil,
+		},
+		{
+			name: "Should return not found error for undefined guide",
+			args: args{
+				guideID:    10,
+				userID:     50,
+				permission: PermissionUpdate,
+			},
+			resFromRepoOnFind: resFromRepoOnFind{
+				guide: nil,
+				err:   nil,
+			},
+			want:    false,
+			wantErr: uservice.NewNotFoundError("Guide", 10),
+		},
+	}
+	for _, tt := range tests {
+		ctrl, rep := prepareMocks(t)
+		s := &guideServiceImpl{
+			repository: rep,
+		}
+
+		rep.
+			EXPECT().
+			FindById(gomock.Eq(tt.args.guideID)).
+			Return(tt.resFromRepoOnFind.guide, tt.resFromRepoOnFind.err)
+
+		got, err := s.CheckPermission(tt.args.guideID, tt.args.userID, tt.args.permission)
+
+		assert.Equal(t, tt.want, got)
+
+		if tt.wantErr != nil {
+			assert.EqualError(t, err, tt.wantErr.Error())
+		} else {
+			assert.Nil(t, err)
+		}
+
+		ctrl.Finish()
+	}
+}
+
+func Test_guideServiceImpl_GetPermissions(t *testing.T) {
+	type args struct {
+		guideID uint
+		userID  uint
+	}
+	type resFromRepoOnFind struct {
+		guide entity.Guide
+		err   error
+	}
+	tests := []struct {
+		name              string
+		args              args
+		resFromRepoOnFind resFromRepoOnFind
+		want              []Permission
+		wantErr           error
+	}{
+		{
+			name: "Should return all permissions for creator of guide",
+			args: args{
+				guideID: 10,
+				userID:  30,
+			},
+			resFromRepoOnFind: resFromRepoOnFind{
+				guide: func() entity.Guide { g, _ := entity.NewGuide(10, "{}", "desc", 30); return g }(),
+				err:   nil,
+			},
+			want:    []Permission{PermissionUpdate},
+			wantErr: nil,
+		},
+		{
+			name: "Should return empty permissions for undefined user",
+			args: args{
+				guideID: 10,
+				userID:  50,
+			},
+			resFromRepoOnFind: resFromRepoOnFind{
+				guide: func() entity.Guide { g, _ := entity.NewGuide(10, "{}", "desc", 30); return g }(),
+				err:   nil,
+			},
+			want:    []Permission{},
+			wantErr: nil,
+		},
+		{
+			name: "Should return not found error for undefined guide",
+			args: args{
+				guideID: 10,
+				userID:  50,
+			},
+			resFromRepoOnFind: resFromRepoOnFind{
+				guide: nil,
+				err:   nil,
+			},
+			want:    nil,
+			wantErr: uservice.NewNotFoundError("Guide", 10),
+		},
+	}
+	for _, tt := range tests {
+		ctrl, rep := prepareMocks(t)
+		s := &guideServiceImpl{
+			repository: rep,
+		}
+
+		rep.
+			EXPECT().
+			FindById(gomock.Eq(tt.args.guideID)).
+			Return(tt.resFromRepoOnFind.guide, tt.resFromRepoOnFind.err)
+
+		got, err := s.GetPermissions(tt.args.guideID, tt.args.userID)
+
+		if tt.want != nil {
+			assert.NotNil(t, got)
+			assert.Equal(t, len(tt.want), len(got))
+			for i, expected := range tt.want {
+				assert.Equal(t, expected, got[i])
+			}
+		} else {
+			assert.Nil(t, got)
+		}
+
+		if tt.wantErr != nil {
+			assert.EqualError(t, err, tt.wantErr.Error())
+		} else {
+			assert.Nil(t, err)
+		}
+
+		ctrl.Finish()
+	}
+}
+
 func prepareMocks(t *testing.T) (
 	guideRepositoryCtrl *gomock.Controller,
 	guideRepositoryMock *mocks.MockGuideRepository,
