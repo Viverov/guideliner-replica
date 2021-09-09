@@ -13,7 +13,14 @@
   },
   "kafka": {
     "host": "127.0.0.1",
-    "port": "9092"
+    "port": "9092",
+    "topics": [
+      {
+        "name": "test",
+        "numPartitions": 1,
+        "replicationFactor": 1
+      }
+    ]
   },
   "tokens": {
     "secretKey": "SECRET_KEY"

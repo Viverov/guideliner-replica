@@ -23,8 +23,9 @@ type Config struct {
 		Port string `json:"port" envconfig:"GUIDELINER_SERVER_PORT" validate:"required"`
 	} `json:"server"`
 	Kafka struct {
-		Host string `json:"host" envconfig:"GUIDELINER_KAFKA_HOST" validate:"required"`
-		Port string `json:"port" envconfig:"GUIDELINER_KAFKA_PORT" validate:"required"`
+		Host   string           `json:"host" envconfig:"GUIDELINER_KAFKA_HOST" validate:"required"`
+		Port   string           `json:"port" envconfig:"GUIDELINER_KAFKA_PORT" validate:"required"`
+		Topics topicInfoDecoder `json:"topics" envconfig:"GUIDELINER_KAFKA_TOPICS" validate:"required"`
 	} `json:"kafka"`
 	DB struct {
 		Host     string `json:"host" envconfig:"GUIDELINER_DB_HOST" validate:"required"`
@@ -71,7 +72,6 @@ func InitConfig(env string, jsonPath string) *Config {
 	log(env, "Process ENV...\n")
 	readEnv(cfg)
 	log(env, "Done!\n")
-
 	log(env, "Validate config...\n")
 	err := validator.New().Struct(cfg)
 	if err != nil {
@@ -109,4 +109,27 @@ func log(env string, format string, args ...interface{}) {
 		return
 	}
 	fmt.Printf(format, args...)
+}
+
+type topicInfo struct {
+	Name              string `json:"name"`
+	NumPartitions     int    `json:"numPartitions"`
+	ReplicationFactor int    `json:"replicationFactor"`
+}
+
+type topicInfoDecoder []topicInfo
+
+func (d *topicInfoDecoder) Decode(value string) error {
+	if value == "" {
+		return nil
+	}
+
+	topicInfos := &[]topicInfo{}
+	err := json.Unmarshal([]byte(value), topicInfos)
+	if err != nil {
+		return err
+	}
+
+	*d = *topicInfos
+	return nil
 }
