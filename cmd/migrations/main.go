@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/Viverov/guideliner/internal/config"
-	"github.com/Viverov/guideliner/internal/db"
+	"github.com/Viverov/guideliner/internal/connectors"
 	"github.com/Viverov/guideliner/internal/migrations"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"log"
@@ -15,7 +15,7 @@ func main() {
 	env := strings.ToUpper(os.Getenv("GUIDELINER_ENV"))
 	cfg := config.InitConfig(env, "./config.json")
 
-	dbInstance := db.GetDB(&db.DBOptions{
+	dbInstance := connectors.GetDB(&connectors.DBOptions{
 		Host:     cfg.DB.Host,
 		Port:     cfg.DB.Port,
 		Login:    cfg.DB.Login,

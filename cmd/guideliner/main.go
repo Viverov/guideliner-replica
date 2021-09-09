@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/Viverov/guideliner/internal/config"
+	"github.com/Viverov/guideliner/internal/connectors"
 	"github.com/Viverov/guideliner/internal/cradle"
-	"github.com/Viverov/guideliner/internal/db"
 	"github.com/Viverov/guideliner/internal/domains/guide"
 	"github.com/Viverov/guideliner/internal/domains/user"
 	"github.com/Viverov/guideliner/internal/server"
@@ -25,7 +25,7 @@ func main() {
 	cradleBuilder.SetConfig(cfg)
 
 	// Init DB
-	dbInstance := db.GetDB(&db.DBOptions{
+	dbInstance := connectors.GetDB(&connectors.DBOptions{
 		Host:     cfg.DB.Host,
 		Port:     cfg.DB.Port,
 		Login:    cfg.DB.Login,

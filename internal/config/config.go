@@ -22,6 +22,10 @@ type Config struct {
 		Host string `json:"host" envconfig:"GUIDELINER_SERVER_HOST" validate:"required"`
 		Port string `json:"port" envconfig:"GUIDELINER_SERVER_PORT" validate:"required"`
 	} `json:"server"`
+	Kafka struct {
+		Host string `json:"host" envconfig:"GUIDELINER_KAFKA_HOST" validate:"required"`
+		Port string `json:"port" envconfig:"GUIDELINER_KAFKA_PORT" validate:"required"`
+	} `json:"kafka"`
 	DB struct {
 		Host     string `json:"host" envconfig:"GUIDELINER_DB_HOST" validate:"required"`
 		Port     string `json:"port" envconfig:"GUIDELINER_DB_PORT" validate:"required"`

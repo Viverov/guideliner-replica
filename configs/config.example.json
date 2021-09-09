@@ -11,6 +11,10 @@
     "host": "127.0.0.1",
     "port": "8080"
   },
+  "kafka": {
+    "host": "127.0.0.1",
+    "port": "9092"
+  },
   "tokens": {
     "secretKey": "SECRET_KEY"
   }

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Viverov/guideliner/internal/config"
-	"github.com/Viverov/guideliner/internal/db"
+	"github.com/Viverov/guideliner/internal/connectors"
 	"github.com/Viverov/guideliner/internal/domains/guide/entity"
 	"github.com/Viverov/guideliner/internal/domains/util"
 	"github.com/Viverov/guideliner/internal/domains/util/urepo"
@@ -16,7 +16,7 @@ import (
 )
 
 var cfg = config.InitConfig(config.EnvTest, "./config.json")
-var dbInstance = db.GetDB(&db.DBOptions{
+var dbInstance = connectors.GetDB(&connectors.DBOptions{
 	Host:     cfg.DB.Host,
 	Port:     cfg.DB.Port,
 	Login:    cfg.DB.Login,

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/Viverov/guideliner/internal/config"
-	"github.com/Viverov/guideliner/internal/db"
+	"github.com/Viverov/guideliner/internal/connectors"
 	"os"
 	"strings"
 )
@@ -21,7 +21,7 @@ func main() {
 	}
 
 	fmt.Printf("Clean database %s...\n", cfg.DB.Name)
-	dbInstance := db.GetDB(&db.DBOptions{
+	dbInstance := connectors.GetDB(&connectors.DBOptions{
 		Host:     cfg.DB.Host,
 		Port:     cfg.DB.Port,
 		Login:    cfg.DB.Login,
