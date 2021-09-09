@@ -8,8 +8,8 @@ import (
 	"strconv"
 )
 
-func InitKafka(config *config.Config) {
-	conn, err := kafka.Dial("tcp", fmt.Sprint(config.Kafka.Host, ":", config.Kafka.Port))
+func InitKafka(cfg *config.Config) {
+	conn, err := kafka.Dial("tcp", fmt.Sprint(cfg.Kafka.Host, ":", cfg.Kafka.Port))
 	if err != nil {
 		panic(err.Error())
 	}
@@ -20,18 +20,23 @@ func InitKafka(config *config.Config) {
 		panic(err.Error())
 	}
 	var controllerConn *kafka.Conn
-	controllerConn, err = kafka.Dial("tcp", net.JoinHostPort(config.Kafka.Host, strconv.Itoa(controller.Port)))
+	controllerConn, err = kafka.Dial("tcp", net.JoinHostPort(cfg.Kafka.Host, strconv.Itoa(controller.Port)))
 	if err != nil {
 		panic(err.Error())
 	}
 	defer controllerConn.Close()
 
 	topicConfigs := []kafka.TopicConfig{}
-	for _, ti := range config.Kafka.Topics {
+	for _, ti := range []config.TopicInfo{
+		cfg.Kafka.UsersTopic,
+		cfg.Kafka.UsersReplyTopic,
+		cfg.Kafka.GuidesTopic,
+		cfg.Kafka.GuidesReplyTopic,
+	} {
 		topicConfigs = append(topicConfigs, kafka.TopicConfig{
-			Topic:              ti.Name,
-			NumPartitions:      ti.NumPartitions,
-			ReplicationFactor:  ti.ReplicationFactor,
+			Topic:             ti.Name,
+			NumPartitions:     ti.NumPartitions,
+			ReplicationFactor: ti.ReplicationFactor,
 		})
 	}
 
@@ -40,3 +45,4 @@ func InitKafka(config *config.Config) {
 		panic(err.Error())
 	}
 }
+

@@ -23,9 +23,12 @@ type Config struct {
 		Port string `json:"port" envconfig:"GUIDELINER_SERVER_PORT" validate:"required"`
 	} `json:"server"`
 	Kafka struct {
-		Host   string           `json:"host" envconfig:"GUIDELINER_KAFKA_HOST" validate:"required"`
-		Port   string           `json:"port" envconfig:"GUIDELINER_KAFKA_PORT" validate:"required"`
-		Topics topicInfoDecoder `json:"topics" envconfig:"GUIDELINER_KAFKA_TOPICS" validate:"required"`
+		Host             string           `json:"host" envconfig:"GUIDELINER_KAFKA_HOST" validate:"required"`
+		Port             string    `json:"port" envconfig:"GUIDELINER_KAFKA_PORT" validate:"required"`
+		UsersTopic       TopicInfo `json:"usersTopic" envconfig:"GUIDELINER_KAFKA_USERS_TOPIC" validate:"required"`
+		UsersReplyTopic  TopicInfo `json:"usersReplyTopic" envconfig:"GUIDELINER_KAFKA_USERS_REPLY_TOPIC" validate:"required"`
+		GuidesTopic      TopicInfo `json:"guidesTopic" envconfig:"GUIDELINER_KAFKA_GUIDES_TOPIC" validate:"required"`
+		GuidesReplyTopic TopicInfo `json:"guidesReplyTopic" envconfig:"GUIDELINER_KAFKA_GUIDES_REPLY_TOPIC" validate:"required"`
 	} `json:"kafka"`
 	DB struct {
 		Host     string `json:"host" envconfig:"GUIDELINER_DB_HOST" validate:"required"`
@@ -78,7 +81,6 @@ func InitConfig(env string, jsonPath string) *Config {
 		panic(err)
 	}
 	log(env, "Done!\n")
-
 	return cfg
 }
 
@@ -111,20 +113,18 @@ func log(env string, format string, args ...interface{}) {
 	fmt.Printf(format, args...)
 }
 
-type topicInfo struct {
+type TopicInfo struct {
 	Name              string `json:"name"`
 	NumPartitions     int    `json:"numPartitions"`
 	ReplicationFactor int    `json:"replicationFactor"`
 }
 
-type topicInfoDecoder []topicInfo
-
-func (d *topicInfoDecoder) Decode(value string) error {
+func (d *TopicInfo) Decode(value string) error {
 	if value == "" {
 		return nil
 	}
 
-	topicInfos := &[]topicInfo{}
+	topicInfos := &TopicInfo{}
 	err := json.Unmarshal([]byte(value), topicInfos)
 	if err != nil {
 		return err

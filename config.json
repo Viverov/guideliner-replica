@@ -14,13 +14,26 @@
   "kafka": {
     "host": "kafka",
     "port": "9092",
-    "topics": [
-      {
-        "name": "test",
-        "numPartitions": 1,
-        "replicationFactor": 1
-      }
-    ]
+    "usersTopic": {
+      "name": "users_topic",
+      "numPartitions": 1,
+      "replicationFactor": 1
+    },
+    "usersReplyTopic": {
+      "name": "users_reply",
+      "numPartitions": 1,
+      "replicationFactor": 1
+    },
+    "guidesTopic": {
+      "name": "guides",
+      "numPartitions": 1,
+      "replicationFactor": 1
+    },
+    "guidesReplyTopic": {
+      "name": "guides_reply",
+      "numPartitions": 1,
+      "replicationFactor": 1
+    }
   },
   "tokens": {
     "secretKey": "SECRET_KEY"
