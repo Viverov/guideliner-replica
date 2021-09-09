@@ -35,6 +35,9 @@ func main() {
 	})
 	cradleBuilder.SetSqlDB(dbInstance)
 
+	// Init kafka
+	connectors.InitKafka(cfg)
+
 	// Init services
 	cradleBuilder.SetUserService(user.BuildUserService(cfg.Tokens.SecretKey, dbInstance))
 	cradleBuilder.SetGuideService(guide.BuildGuideService(dbInstance))

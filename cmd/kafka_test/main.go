@@ -14,8 +14,8 @@ func main() {
 	env := strings.ToUpper(os.Getenv("GUIDELINER_ENV"))
 	cfg := config.InitConfig(env, "./config.json")
 
+	connectors.InitKafka(cfg)
 	prod := connectors.NewKafkaProducer(cfg, "test")
-
 	cons := connectors.NewKafkaConsumer(cfg, connectors.KafkaConsumerOptions{
 		Topic:         "test",
 		ConsumerGroup: "testgroup",

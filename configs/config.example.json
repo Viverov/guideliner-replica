@@ -12,7 +12,7 @@
     "port": "8080"
   },
   "kafka": {
-    "host": "127.0.0.1",
+    "host": "kafka",
     "port": "9092",
     "topics": [
       {
