@@ -7,9 +7,13 @@ ___
 # Requirements:
 ___
 
-[golang 1.16](https://golang.org/dl/)
++ [golang 1.16](https://golang.org/dl/)
++ [gomock](https://github.com/golang/mock)
++ [golangci-lint 1.40](https://golangci-lint.run/usage/install/)
 
-[golangci-lint 1.40](https://golangci-lint.run/usage/install/)
+# External dependencies
+
++ Postgresql-12.6
 
 # Commands
 ___
