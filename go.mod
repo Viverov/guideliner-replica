@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/bxcodec/faker/v3 v3.6.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/gin-gonic/gin v1.7.1
+	github.com/gin-gonic/gin v1.7.7
 	github.com/go-gormigrate/gormigrate/v2 v2.0.0
 	github.com/go-playground/validator/v10 v10.5.0
 	github.com/golang/mock v1.6.0
@@ -16,9 +16,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lib/pq v1.6.0 // indirect
-	github.com/nicksnyder/go-i18n/v2 v2.1.2 // indirect
 	github.com/stretchr/testify v1.7.0
-	github.com/thoas/go-funk v0.9.0 // indirect
 	github.com/ugorji/go v1.2.5 // indirect
 	golang.org/x/crypto v0.0.0-20210503195802-e9a32991a82e
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
